@@ -139,11 +139,19 @@ return [
     'team_resolver' => \Spatie\Permission\DefaultTeamResolver::class,
 
     /*
-     * Passport Client Credentials Grant
-     * When set to true the package will use Passports Client to check permissions
+     * Default Guard Name
+     * 
+     * When using the "HasRoles" trait from this package, we need to know which
+     * guard should be used by default. By default, it uses the 'web' guard.
+     */
+    'default_guard_name' => 'api',
+
+    /*
+     * Sanctum Token Credentials Grant
+     * When set to true the package will use Sanctum tokens to check permissions
      */
 
-    'use_passport_client_credentials' => false,
+    'use_sanctum_token_credentials' => false,
 
     /*
      * When set to true, the required permission names are added to exception messages.

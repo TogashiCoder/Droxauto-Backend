@@ -60,11 +60,16 @@ class RolePermissionSeeder extends Seeder
         // Assign all permissions to admin
         $adminRole->givePermissionTo(Permission::all());
 
-        // Assign basic permissions to user
-        $userRole->givePermissionTo([
+        // Basic user role with minimal permissions (for admin-created users)
+        $basicUserRole = Role::create(['name' => 'basic_user', 'guard_name' => 'api']);
+        $basicUserRole->givePermissionTo([
             'view dapartos',
             'view csv status',
         ]);
+
+        // User role has no permissions by default
+        // Self-registered users get no role and no permissions
+        // Only admin-created users get specific roles and permissions
 
         // Assign manager permissions
         $managerRole->givePermissionTo([
@@ -105,5 +110,7 @@ class RolePermissionSeeder extends Seeder
         $this->command->info('Admin user: admin@example.com / password');
         $this->command->info('Regular user: user@example.com / password');
         $this->command->info('Manager user: manager@example.com / password');
+        $this->command->info('Note: Self-registered users get NO roles/permissions');
+        $this->command->info('Admin-created users get "basic_user" role by default');
     }
 }

@@ -206,8 +206,8 @@ class UserController extends Controller
             if ($request->has('roles')) {
                 $user->syncRoles($request->roles);
             } else {
-                // Assign default user role
-                $user->assignRole('user');
+                // Assign basic user role with minimal permissions
+                $user->assignRole('basic_user');
             }
 
             $user->load('roles');

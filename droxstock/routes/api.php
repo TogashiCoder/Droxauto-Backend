@@ -41,13 +41,52 @@ Route::prefix('v1')->middleware('auth:api')->group(function () {
     // Admin routes (admin role required)
     Route::prefix('admin')->middleware('role:admin')->group(function () {
 
-        // Role management
-        Route::apiResource('roles', RoleController::class);
-        Route::get('roles/{role}/permissions', [RoleController::class, 'permissions']);
-
         // User management
         Route::apiResource('users', UserController::class);
         Route::get('users/{user}/roles', [UserController::class, 'roles']);
         Route::put('users/{user}/roles', [UserController::class, 'updateRoles']);
     });
+});
+
+// RBAC Management Routes
+Route::prefix('v1/admin')->middleware(['auth:api', 'role:admin'])->group(function () {
+
+    // Role Management
+    Route::apiResource('roles', \App\Http\Controllers\Api\Admin\RoleController::class)->names([
+        'index' => 'api.v1.admin.roles.index',
+        'store' => 'api.v1.admin.roles.store',
+        'show' => 'api.v1.admin.roles.show',
+        'update' => 'api.v1.admin.roles.update',
+        'destroy' => 'api.v1.admin.roles.destroy',
+    ]);
+
+    // Permission Management
+    Route::get('permissions/statistics', [\App\Http\Controllers\Api\Admin\PermissionController::class, 'statistics']);
+    Route::post('permissions/{id}/clone', [\App\Http\Controllers\Api\Admin\PermissionController::class, 'clone']);
+    Route::apiResource('permissions', \App\Http\Controllers\Api\Admin\PermissionController::class)->names([
+        'index' => 'api.v1.admin.permissions.index',
+        'store' => 'api.v1.admin.permissions.store',
+        'show' => 'api.v1.admin.permissions.show',
+        'update' => 'api.v1.admin.permissions.update',
+        'destroy' => 'api.v1.admin.permissions.destroy',
+    ]);
+
+    // User Role Assignment
+    Route::post('users/assign-role', [\App\Http\Controllers\Api\Admin\UserRoleController::class, 'assignRole']);
+    Route::post('users/assign-multiple-roles', [\App\Http\Controllers\Api\Admin\UserRoleController::class, 'assignMultipleRoles']);
+    Route::post('users/remove-role', [\App\Http\Controllers\Api\Admin\UserRoleController::class, 'removeRole']);
+    Route::post('users/remove-all-roles', [\App\Http\Controllers\Api\Admin\UserRoleController::class, 'removeAllRoles']);
+    Route::get('users/{user}/permissions', [\App\Http\Controllers\Api\Admin\UserRoleController::class, 'getUserPermissions']);
+
+    // User Permission Management
+    Route::post('users/assign-permission', [\App\Http\Controllers\Api\Admin\UserPermissionController::class, 'assignPermission']);
+    Route::post('users/assign-multiple-permissions', [\App\Http\Controllers\Api\Admin\UserPermissionController::class, 'assignMultiplePermissions']);
+    Route::post('users/remove-permission', [\App\Http\Controllers\Api\Admin\UserPermissionController::class, 'removePermission']);
+    Route::post('users/remove-all-permissions', [\App\Http\Controllers\Api\Admin\UserPermissionController::class, 'removeAllPermissions']);
+
+    // Role Permission Management
+    Route::post('roles/assign-permission', [\App\Http\Controllers\Api\Admin\RolePermissionController::class, 'assignPermission']);
+    Route::post('roles/assign-multiple-permissions', [\App\Http\Controllers\Api\Admin\RolePermissionController::class, 'assignMultiplePermissions']);
+    Route::post('roles/remove-permission', [\App\Http\Controllers\Api\Admin\RolePermissionController::class, 'removePermission']);
+    Route::post('roles/remove-all-permissions', [\App\Http\Controllers\Api\Admin\RolePermissionController::class, 'removeAllPermissions']);
 });

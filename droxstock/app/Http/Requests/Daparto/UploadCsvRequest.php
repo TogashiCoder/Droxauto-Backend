@@ -12,7 +12,7 @@ class UploadCsvRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true; // Will be handled by Passport later
+        return true; // Will be handled by Sanctum middleware
     }
 
     /**

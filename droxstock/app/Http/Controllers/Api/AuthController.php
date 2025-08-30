@@ -106,8 +106,7 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            // Assign default user role
-            $user->assignRole('user');
+            // No role assigned - user has no permissions until admin grants them
 
             // Create access token
             $accessToken = $user->createToken('AuthToken')->accessToken;
@@ -136,7 +135,7 @@ class AuthController extends Controller
                     'access_token' => $accessToken,
                     'refresh_token' => $refreshToken,
                     'token_type' => 'Bearer',
-                    'expires_in' => config('passport.tokens.expire_in', 1296000), // 15 days in seconds
+                    'expires_in' => config('sanctum.expiration', 1296000), // 15 days in seconds
                 ]
             ], 201);
         } catch (\Exception $e) {
@@ -271,7 +270,7 @@ class AuthController extends Controller
                     'access_token' => $accessToken,
                     'refresh_token' => $refreshToken,
                     'token_type' => 'Bearer',
-                    'expires_in' => config('passport.tokens.expire_in', 1296000), // 15 days in seconds
+                    'expires_in' => config('sanctum.expiration', 1296000), // 15 days in seconds
                 ]
             ]);
         } catch (ValidationException $e) {
@@ -548,7 +547,7 @@ class AuthController extends Controller
                     'access_token' => $accessToken,
                     'refresh_token' => $newRefreshToken,
                     'token_type' => 'Bearer',
-                    'expires_in' => config('passport.tokens.expire_in', 1296000), // 15 days in seconds
+                    'expires_in' => config('sanctum.expiration', 1296000), // 15 days in seconds
                 ]
             ]);
         } catch (\Exception $e) {

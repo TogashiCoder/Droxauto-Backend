@@ -1,47 +1,101 @@
 <?php
 
+use Tests\Feature\TestHelpers;
+
 /*
 |--------------------------------------------------------------------------
-| Test Case
+| Test Case Configuration
 |--------------------------------------------------------------------------
 |
-| The closure you provide to your test functions is always bound to a specific PHPUnit test
-| case class. By default, that class is "PHPUnit\Framework\TestCase". Of course, you may
-| need to change it using the "pest()" function to bind a different classes or traits.
+| This file contains the configuration for your test suite. It's loaded
+| before each test and provides a clean testing environment.
 |
 */
 
-pest()->extend(Tests\TestCase::class)
- // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+pest()->extend(\Tests\TestCase::class)
     ->in('Feature');
 
-/*
-|--------------------------------------------------------------------------
-| Expectations
-|--------------------------------------------------------------------------
-|
-| When you're writing tests, you often need to check that values meet certain conditions. The
-| "expect()" function gives you access to a set of "expectations" methods that you can use
-| to assert different things. Of course, you may extend the Expectation API at any time.
-|
-*/
 
-expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
-});
+
+
 
 /*
 |--------------------------------------------------------------------------
-| Functions
+| Test Helpers
 |--------------------------------------------------------------------------
 |
-| While Pest is very powerful out-of-the-box, you may have some testing code specific to your
-| project that you don't want to repeat in every file. Here you can also expose helpers as
-| global functions to help you to reduce the number of lines of code in your test files.
+| Register custom test helpers and utilities here.
 |
 */
 
-function something()
+// Helper function to create and authenticate admin user
+function createAdminUser()
 {
-    // ..
+    $user = TestHelpers::createAdminUser();
+    test()->actingAs($user, 'api');
+    return $user;
+}
+
+// Helper function to create and authenticate basic user
+function createBasicUser()
+{
+    $user = TestHelpers::createBasicUser();
+    test()->actingAs($user, 'api');
+    return $user;
+}
+
+// Helper function to create and authenticate manager user
+function createManagerUser()
+{
+    $user = TestHelpers::createManagerUser();
+    test()->actingAs($user, 'api');
+    return $user;
+}
+
+// Helper function to create unauthorized user (no roles)
+function createUnauthorizedUser()
+{
+    return TestHelpers::createUnauthorizedUser();
+}
+
+// Helper function to generate valid user data
+function validUserData(array $overrides = [])
+{
+    return TestHelpers::validUserData($overrides);
+}
+
+// Helper function to generate valid admin user data
+function validAdminUserData(array $overrides = [])
+{
+    return TestHelpers::validAdminUserData($overrides);
+}
+
+// Helper function to generate valid login data
+function validLoginData(array $overrides = [])
+{
+    return TestHelpers::validLoginData($overrides);
+}
+
+// Helper function to assert user has permissions
+function assertUserHasPermissions($user, array $permissions)
+{
+    TestHelpers::assertUserHasPermissions($user, $permissions);
+}
+
+// Helper function to assert user does not have permissions
+function assertUserDoesNotHavePermissions($user, array $permissions)
+{
+    TestHelpers::assertUserDoesNotHavePermissions($user, $permissions);
+}
+
+// Helper function to assert user has roles
+function assertUserHasRoles($user, array $roles)
+{
+    TestHelpers::assertUserHasRoles($user, $roles);
+}
+
+// Helper function to assert user does not have roles
+function assertUserDoesNotHaveRoles($user, array $roles)
+{
+    TestHelpers::assertUserDoesNotHaveRoles($user, $roles);
 }
