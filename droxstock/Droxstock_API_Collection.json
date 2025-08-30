@@ -1,0 +1,807 @@
+{
+	"info": {
+		"_postman_id": "droxstock-api-collection",
+		"name": "Droxstock API Collection",
+		"description": "Complete API collection for Droxstock application with authentication, user management, and Daparto operations",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "droxstock-api"
+	},
+	"item": [
+		{
+			"name": "🔐 Authentication",
+			"description": "User authentication and token management endpoints",
+			"item": [
+				{
+					"name": "User Registration",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "register"]
+						},
+						"description": "Register a new user account"
+					},
+					"response": []
+				},
+				{
+					"name": "User Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "login"]
+						},
+						"description": "Login and receive JWT token"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/me",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "me"]
+						},
+						"description": "Get current user information"
+					},
+					"response": []
+				},
+				{
+					"name": "🔄 Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh_token\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/refresh",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "refresh"]
+						},
+						"description": "Use refresh token to get new access token and refresh token. This endpoint is PUBLIC (no authentication required)."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Auto-save new tokens after refresh",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.success && response.data) {",
+									"        pm.environment.set(\"access_token\", response.data.access_token);",
+									"        pm.environment.set(\"refresh_token\", response.data.refresh_token);",
+									"        console.log(\"✅ Tokens refreshed and saved automatically!\");",
+									"        console.log(\"New access token: \" + response.data.access_token.substring(0, 50) + \"...\");",
+									"        console.log(\"New refresh token: \" + response.data.refresh_token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "User Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "logout"]
+						},
+						"description": "Logout and invalidate current token"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📊 Daparto Management",
+			"description": "Daparto CRUD operations and data management",
+			"item": [
+				{
+					"name": "Get All Dapartos",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/dapartos?page=1&per_page=20&search=&brand=&min_price=&max_price=&sort_by=created_at&sort_order=desc",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "dapartos"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "20"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "brand",
+									"value": ""
+								},
+								{
+									"key": "min_price",
+									"value": ""
+								},
+								{
+									"key": "max_price",
+									"value": ""
+								},
+								{
+									"key": "sort_by",
+									"value": "created_at"
+								},
+								{
+									"key": "sort_order",
+									"value": "desc"
+								}
+							]
+						},
+						"description": "Get paginated list of Dapartos with filtering and sorting"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Daparto by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/dapartos/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "dapartos", "1"]
+						},
+						"description": "Get specific Daparto by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create New Daparto",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tiltle\": \"Sample Part Title\",\n    \"teilemarke_teilenummer\": \"BMW-12345\",\n    \"preis\": \"29.99\",\n    \"interne_artikelnummer\": \"INT-001\",\n    \"zustand\": \"Neu\",\n    \"pfand\": \"0.00\",\n    \"versandklasse\": \"Standard\",\n    \"lieferzeit\": \"2-3 days\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/dapartos",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "dapartos"]
+						},
+						"description": "Create a new Daparto record"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Daparto",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tiltle\": \"Updated Part Title\",\n    \"preis\": \"39.99\",\n    \"zustand\": \"Gebraucht\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/dapartos/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "dapartos", "1"]
+						},
+						"description": "Update an existing Daparto record"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Daparto",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/dapartos/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "dapartos", "1"]
+						},
+						"description": "Delete a specific Daparto record"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete All Dapartos",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/dapartos-delete-all",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "dapartos-delete-all"]
+						},
+						"description": "⚠️ WARNING: This will delete ALL Daparto data from the database. Requires 'delete dapartos' permission."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Daparto Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/dapartos-stats",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "dapartos-stats"]
+						},
+						"description": "Get Daparto statistics and summary information"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Daparto by Number",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/dapartos-by-number/INT-001",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "dapartos-by-number", "INT-001"]
+						},
+						"description": "Find Daparto by internal article number"
+					},
+					"response": []
+				},
+				{
+					"name": "Restore Deleted Daparto",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/dapartos/1/restore",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "dapartos", "1", "restore"]
+						},
+						"description": "Restore a soft-deleted Daparto record"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📁 CSV Processing",
+			"description": "CSV file upload and processing management",
+			"item": [
+				{
+					"name": "Upload CSV File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "csv_file",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "validation_mode",
+									"value": "strict",
+									"description": "Validation mode: strict, lenient"
+								},
+								{
+									"key": "update_existing",
+									"value": "true",
+									"description": "Update existing records"
+								},
+								{
+									"key": "skip_duplicates",
+									"value": "false",
+									"description": "Skip duplicate records"
+								},
+								{
+									"key": "batch_size",
+									"value": "2000",
+									"description": "Processing batch size"
+								},
+								{
+									"key": "rollback_on_error",
+									"value": "true",
+									"description": "Rollback on error"
+								},
+								{
+									"key": "email_notification",
+									"value": "true",
+									"description": "Send email notification"
+								},
+								{
+									"key": "user_email",
+									"value": "user@example.com",
+									"description": "Email for notifications"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/dapartos-upload-csv",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "dapartos-upload-csv"]
+						},
+						"description": "Upload CSV file for processing with background job"
+					},
+					"response": []
+				},
+				{
+					"name": "Check CSV Job Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/csv-job-status/job_68af0bdf6c25e",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "csv-job-status", "job_68af0bdf6c25e"]
+						},
+						"description": "Check the status of a CSV processing job"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "👥 Admin - User Management",
+			"description": "Admin endpoints for managing users and their roles (Admin role required)",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/users",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "users"]
+						},
+						"description": "Get list of all users (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create New User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"New User\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"password123\",\n    \"roles\": [\"user\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/users",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "users"]
+						},
+						"description": "Create a new user account (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/users/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "users", "1"]
+						},
+						"description": "Get detailed information about a specific user (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated User Name\",\n    \"email\": \"updated@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/users/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "users", "1"]
+						},
+						"description": "Update user information (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/users/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "users", "1"]
+						},
+						"description": "Delete a user account (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Roles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/users/1/roles",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "users", "1", "roles"]
+						},
+						"description": "Get roles assigned to a specific user (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Roles",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roles\": [\"manager\", \"user\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/users/1/roles",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "users", "1", "roles"]
+						},
+						"description": "Update roles assigned to a user (Admin only)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🔑 Admin - Role Management",
+			"description": "Admin endpoints for managing roles and permissions (Admin role required)",
+			"item": [
+				{
+					"name": "Get All Roles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/roles",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "roles"]
+						},
+						"description": "Get list of all roles (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create New Role",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"editor\",\n    \"guard_name\": \"web\",\n    \"permissions\": [\"view dapartos\", \"edit dapartos\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/roles",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "roles"]
+						},
+						"description": "Create a new role with permissions (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Role Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/roles/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "roles", "1"]
+						},
+						"description": "Get detailed information about a specific role (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Role",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"senior_editor\",\n    \"permissions\": [\"view dapartos\", \"edit dapartos\", \"delete dapartos\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/roles/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "roles", "1"]
+						},
+						"description": "Update role information and permissions (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Role",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/roles/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "roles", "1"]
+						},
+						"description": "Delete a role (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Role Permissions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/roles/1/permissions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "roles", "1", "permissions"]
+						},
+						"description": "Get permissions assigned to a specific role (Admin only)"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-set Content-Type for JSON requests",
+					"if (pm.request.body && pm.request.body.mode === 'raw') {",
+					"    pm.request.headers.add({",
+					"        key: 'Content-Type',",
+					"        value: 'application/json'",
+					"    });",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-save access token from login response",
+					"if (pm.response.code === 200 || pm.response.code === 201) {",
+					"    const response = pm.response.json();",
+					"    if (response.data && response.data.access_token) {",
+					"        pm.environment.set('access_token', response.data.access_token);",
+					"        console.log('Access token saved automatically');",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string",
+			"description": "Base URL for the API"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string",
+			"description": "JWT access token (auto-filled after login)"
+		}
+	]
+}
