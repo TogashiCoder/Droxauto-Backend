@@ -118,8 +118,8 @@ class UploadCsvRequest extends FormRequest
                 return;
             }
 
-            // Check for required headers
-            $requiredHeaders = ['interne Artikelnummer', 'Preis', 'Zustand'];
+            // Check for required headers (matching database column names)
+            $requiredHeaders = ['interne_artikelnummer', 'preis', 'zustand'];
             $missingHeaders = array_diff($requiredHeaders, $headers);
 
             if (!empty($missingHeaders)) {
@@ -142,8 +142,8 @@ class UploadCsvRequest extends FormRequest
      */
     private function validateBusinessRules(Validator $validator): void
     {
-        $validationMode = $this->input('validation_mode', 'strict');
-        $batchSize = $this->input('batch_size', 1000);
+        $validationMode = $this->get('validation_mode', 'strict');
+        $batchSize = $this->get('batch_size', 1000);
 
         // Business rule validations
         if ($batchSize > 5000 && $validationMode === 'strict') {
@@ -159,7 +159,7 @@ class UploadCsvRequest extends FormRequest
         $booleanFields = ['email_notification', 'update_existing', 'skip_duplicates'];
 
         foreach ($booleanFields as $field) {
-            $value = $this->input($field);
+            $value = $this->get($field);
 
             if ($value !== null) {
                 // Convert any truthy/falsy value to boolean

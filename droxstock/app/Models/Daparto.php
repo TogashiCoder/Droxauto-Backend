@@ -51,12 +51,12 @@ class Daparto extends Model
         return [
             'tiltle' => 'nullable|string|max:255',
             'teilemarke_teilenummer' => 'required|string|max:255',
-            'preis' => 'required|numeric|min:0',
+            'preis' => 'required|numeric|min:0|max:999999.99',
             'interne_artikelnummer' => 'required|string|max:100|unique:dapartos,interne_artikelnummer' . ($id ? ',' . $id : ''),
-            'zustand' => 'required|integer|min:0',
-            'pfand' => 'required|integer|min:0',
-            'versandklasse' => 'required|integer|min:0',
-            'lieferzeit' => 'required|integer|min:0',
+            'zustand' => 'required|integer|min:1|max:5',
+            'pfand' => 'required|integer|min:0|max:1000',
+            'versandklasse' => 'required|integer|min:1|max:10',
+            'lieferzeit' => 'required|integer|min:1|max:365',
         ];
     }
 
@@ -77,13 +77,14 @@ class Daparto extends Model
     }
 
     /**
-     * Scope for searching by part number or brand
+     * Scope for searching by part number, brand, or title
      */
     public function scopeSearch($query, $search)
     {
         return $query->where(function ($q) use ($search) {
             $q->where('teilemarke_teilenummer', 'LIKE', "%{$search}%")
-                ->orWhere('interne_artikelnummer', 'LIKE', "%{$search}%");
+                ->orWhere('interne_artikelnummer', 'LIKE', "%{$search}%")
+                ->orWhere('tiltle', 'LIKE', "%{$search}%");
         });
     }
 }

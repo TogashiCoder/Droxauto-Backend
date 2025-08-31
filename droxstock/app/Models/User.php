@@ -36,6 +36,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_active',
+        'last_login_at',
+        'deactivated_at',
+        'deactivation_reason',
     ];
 
     /**
@@ -83,5 +87,45 @@ class User extends Authenticatable
     public function getRolesArray(): array
     {
         return $this->getRoleNames()->toArray();
+    }
+
+    /**
+     * Check if user account is active
+     */
+    public function isActive(): bool
+    {
+        return $this->is_active ?? true;
+    }
+
+    /**
+     * Check if user account is deactivated
+     */
+    public function isDeactivated(): bool
+    {
+        return !($this->is_active ?? true);
+    }
+
+    /**
+     * Get deactivation reason
+     */
+    public function getDeactivationReason(): ?string
+    {
+        return $this->deactivation_reason;
+    }
+
+    /**
+     * Get deactivation date
+     */
+    public function getDeactivatedAt(): ?string
+    {
+        return $this->deactivated_at;
+    }
+
+    /**
+     * Get last login date
+     */
+    public function getLastLoginAt(): ?string
+    {
+        return $this->last_login_at;
     }
 }

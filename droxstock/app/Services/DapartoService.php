@@ -63,11 +63,11 @@ class DapartoService
         try {
             // Store original data for comparison
             $originalData = $daparto->toArray();
-            
+
             // Check if there are any changes
             $hasChanges = false;
             $changedFields = [];
-            
+
             foreach ($data as $field => $value) {
                 if (array_key_exists($field, $originalData) && $originalData[$field] != $value) {
                     $hasChanges = true;
@@ -77,38 +77,37 @@ class DapartoService
                     ];
                 }
             }
-            
+
             // If no changes, return early with appropriate message
             if (!$hasChanges) {
                 return [
                     'success' => true,
                     'message' => 'No changes detected',
-                    'data' => new \App\Http\Resources\DapartoResource($daparto),
+                    'data' => new \App\Http\Resources\Daparto\DapartoResource($daparto),
                     'changes' => [],
                     'unchanged' => true
                 ];
             }
-            
+
             // Validate business rules before update
             $this->validateBusinessRules($daparto, $data);
-            
+
             // Perform the update
             $daparto->update($data);
-            
+
             // Refresh the model to get updated data
             $updatedDaparto = $daparto->fresh();
-            
+
             // Log the update for audit purposes
             $this->logUpdate($daparto, $originalData, $data);
-            
+
             return [
                 'success' => true,
                 'message' => 'Daparto updated successfully',
-                'data' => new \App\Http\Resources\DapartoResource($updatedDaparto),
+                'data' => new \App\Http\Resources\Daparto\DapartoResource($updatedDaparto),
                 'changes' => $changedFields,
                 'unchanged' => false
             ];
-            
         } catch (\Illuminate\Database\QueryException $e) {
             // Handle database-specific errors
             throw new \Exception('Database update failed: ' . $e->getMessage());
@@ -117,7 +116,7 @@ class DapartoService
             throw new \Exception('Update failed: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Validate business rules before update
      *
@@ -131,33 +130,33 @@ class DapartoService
         if (isset($data['interne_artikelnummer']) && $data['interne_artikelnummer'] !== $daparto->interne_artikelnummer) {
             throw new \Exception('Internal article number cannot be changed once created');
         }
-        
+
         // Validate price changes (business rule: price cannot be negative)
         if (isset($data['preis']) && $data['preis'] < 0) {
             throw new \Exception('Price cannot be negative');
         }
-        
+
         // Validate condition changes (business rule: condition must be between 0-5)
         if (isset($data['zustand']) && ($data['zustand'] < 0 || $data['zustand'] > 5)) {
             throw new \Exception('Condition must be between 0 and 5');
         }
-        
+
         // Validate deposit changes (business rule: deposit cannot be negative)
         if (isset($data['pfand']) && $data['pfand'] < 0) {
             throw new \Exception('Deposit cannot be negative');
         }
-        
+
         // Validate shipping class changes (business rule: shipping class must be between 1-5)
         if (isset($data['versandklasse']) && ($data['versandklasse'] < 1 || $data['versandklasse'] > 5)) {
             throw new \Exception('Shipping class must be between 1 and 5');
         }
-        
+
         // Validate delivery time changes (business rule: delivery time must be positive)
         if (isset($data['lieferzeit']) && $data['lieferzeit'] < 1) {
             throw new \Exception('Delivery time must be at least 1 day');
         }
     }
-    
+
     /**
      * Log update for audit purposes
      *
@@ -196,25 +195,38 @@ class DapartoService
     }
 
     /**
-     * Get daparto statistics
-     */
-    public function getDapartoStats(): array
-    {
-        return [
-            'total_parts' => Daparto::count(),
-            'total_brands' => Daparto::distinct('teilemarke_teilenummer')->count(),
-            'average_price' => Daparto::avg('preis'),
-            'total_value' => Daparto::sum('preis'),
-            'deleted_parts' => Daparto::onlyTrashed()->count(),
-        ];
-    }
-
-    /**
      * Get daparto by interne artikelnummer
      */
     public function getDapartoByNumber(string $interneArtikelnummer): ?Daparto
     {
         return Daparto::where('interne_artikelnummer', $interneArtikelnummer)->first();
+    }
+
+    /**
+     * Get daparto statistics
+     */
+    public function getDapartoStatistics(): array
+    {
+        return [
+            'total_count' => Daparto::count(),
+            'active_count' => Daparto::where('deleted_at', null)->count(),
+            'deleted_count' => Daparto::onlyTrashed()->count(),
+            'total_value' => Daparto::sum('preis'),
+            'average_price' => Daparto::avg('preis'),
+            'brands_count' => Daparto::distinct('teilemarke_teilenummer')->count(),
+            'condition_distribution' => [
+                'excellent' => Daparto::where('zustand', 5)->count(),
+                'very_good' => Daparto::where('zustand', 4)->count(),
+                'good' => Daparto::where('zustand', 3)->count(),
+                'fair' => Daparto::where('zustand', 2)->count(),
+                'poor' => Daparto::where('zustand', 1)->count(),
+            ],
+            'price_ranges' => [
+                'low' => Daparto::where('preis', '<=', 50)->count(),
+                'medium' => Daparto::whereBetween('preis', [51, 200])->count(),
+                'high' => Daparto::where('preis', '>', 200)->count(),
+            ],
+        ];
     }
 
     /**

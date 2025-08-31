@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
             'permission' => \App\Http\Middleware\CheckPermission::class,
+            'user.active' => \App\Http\Middleware\CheckUserActive::class,
         ]);
 
         // Configure authentication to not redirect for API requests

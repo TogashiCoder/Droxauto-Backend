@@ -5,6 +5,9 @@ namespace App\Http\Resources\Daparto;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * Daparto Resource for API responses
+ */
 class DapartoResource extends JsonResource
 {
     /**
@@ -24,8 +27,9 @@ class DapartoResource extends JsonResource
             'pfand' => $this->pfand,
             'versandklasse' => $this->versandklasse,
             'lieferzeit' => $this->lieferzeit,
-            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
-            'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+            'deleted_at' => $this->deleted_at,
         ];
     }
 }

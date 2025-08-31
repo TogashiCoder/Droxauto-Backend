@@ -132,13 +132,7 @@ class DapartoController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Dapartos retrieved successfully',
-                'data' => new DapartoCollection($dapartos),
-                'pagination' => [
-                    'current_page' => $dapartos->currentPage(),
-                    'last_page' => $dapartos->lastPage(),
-                    'per_page' => $dapartos->perPage(),
-                    'total' => $dapartos->total(),
-                ]
+                'data' => new DapartoCollection($dapartos)
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -593,7 +587,7 @@ class DapartoController extends Controller
     public function stats(): JsonResponse
     {
         try {
-            $stats = $this->dapartoService->getDapartoStats();
+            $stats = $this->dapartoService->getDapartoStatistics();
 
             return response()->json([
                 'success' => true,

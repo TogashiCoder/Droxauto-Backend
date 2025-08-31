@@ -207,7 +207,16 @@ class ProcessCsvUploadJob implements ShouldQueue
                 'usedConditionCount' => $results['business_intelligence']['used_condition_count'] ?? 0,
             ];
 
-            Mail::to($this->options['user_email'])->send(new \App\Mail\CsvProcessingComplete($emailData));
+            // Get user name for email
+            $userName = 'Admin User';
+            if ($this->userId) {
+                $user = \App\Models\User::find($this->userId);
+                if ($user) {
+                    $userName = $user->name;
+                }
+            }
+
+            Mail::to($this->options['user_email'])->send(new \App\Mail\CsvProcessingReport($results, $userName, $this->fileName));
 
             Log::info('CSV processing success email sent', [
                 'file' => $this->fileName,
@@ -234,7 +243,48 @@ class ProcessCsvUploadJob implements ShouldQueue
                 'failedAt' => now()->format('Y-m-d H:i:s'),
             ];
 
-            Mail::to($this->options['user_email'])->send(new \App\Mail\CsvProcessingFailed($emailData));
+            // Get user name for email
+            $userName = 'Admin User';
+            if ($this->userId) {
+                $user = \App\Models\User::find($this->userId);
+                if ($user) {
+                    $userName = $user->name;
+                }
+            }
+
+            // Create error results structure
+            $errorResults = [
+                'success' => false,
+                'message' => 'CSV processing failed',
+                'error_details' => [
+                    'message' => $errorMessage,
+                    'type' => 'processing_error',
+                ],
+                'file_info' => [
+                    'name' => $this->fileName,
+                    'size' => 0,
+                    'uploaded_at' => now(),
+                ],
+                'processing_stats' => [
+                    'total_rows' => 0,
+                    'failed_rows' => 1,
+                ],
+                'validation_summary' => [
+                    'data_quality_score' => 0,
+                ],
+                'performance' => [
+                    'duration' => 0,
+                ],
+                'errors' => [
+                    [
+                        'row' => 'system',
+                        'errors' => [$errorMessage],
+                        'action' => 'system_failure'
+                    ]
+                ],
+            ];
+
+            Mail::to($this->options['user_email'])->send(new \App\Mail\CsvProcessingReport($errorResults, $userName, $this->fileName));
 
             Log::info('CSV processing error email sent', [
                 'file' => $this->fileName,

@@ -15,7 +15,7 @@ Route::prefix('v1/auth')->group(function () {
 });
 
 // Protected routes
-Route::prefix('v1')->middleware('auth:api')->group(function () {
+Route::prefix('v1')->middleware(['auth:api', 'user.active'])->group(function () {
 
     // Authentication routes (protected)
     Route::prefix('auth')->group(function () {
@@ -45,11 +45,14 @@ Route::prefix('v1')->middleware('auth:api')->group(function () {
         Route::apiResource('users', UserController::class);
         Route::get('users/{user}/roles', [UserController::class, 'roles']);
         Route::put('users/{user}/roles', [UserController::class, 'updateRoles']);
+        Route::post('users/{user}/deactivate', [UserController::class, 'deactivate']);
+        Route::post('users/{user}/activate', [UserController::class, 'activate']);
+        Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword']);
     });
 });
 
 // RBAC Management Routes
-Route::prefix('v1/admin')->middleware(['auth:api', 'role:admin'])->group(function () {
+Route::prefix('v1/admin')->middleware(['auth:api', 'user.active', 'role:admin'])->group(function () {
 
     // Role Management
     Route::apiResource('roles', \App\Http\Controllers\Api\Admin\RoleController::class)->names([

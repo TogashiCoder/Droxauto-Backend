@@ -92,6 +92,10 @@ class UserController extends Controller
                         'roles' => $user->getRolesArray(),
                         'permissions' => $user->getPermissionsArray(),
                         'is_admin' => $user->isAdmin(),
+                        'is_active' => $user->isActive(),
+                        'last_login_at' => $user->getLastLoginAt(),
+                        'deactivated_at' => $user->getDeactivatedAt(),
+                        'deactivation_reason' => $user->getDeactivationReason(),
                         'created_at' => $user->created_at,
                         'updated_at' => $user->updated_at,
                     ];
@@ -222,6 +226,10 @@ class UserController extends Controller
                     'roles' => $user->getRolesArray(),
                     'permissions' => $user->getPermissionsArray(),
                     'is_admin' => $user->isAdmin(),
+                    'is_active' => $user->isActive(),
+                    'last_login_at' => $user->getLastLoginAt(),
+                    'deactivated_at' => $user->getDeactivatedAt(),
+                    'deactivation_reason' => $user->getDeactivationReason(),
                     'created_at' => $user->created_at,
                 ]
             ], 201);
@@ -334,6 +342,10 @@ class UserController extends Controller
                     'roles' => $userModel->getRolesArray(),
                     'permissions' => $userModel->getPermissionsArray(),
                     'is_admin' => $userModel->isAdmin(),
+                    'is_active' => $userModel->isActive(),
+                    'last_login_at' => $userModel->getLastLoginAt(),
+                    'deactivated_at' => $userModel->getDeactivatedAt(),
+                    'deactivation_reason' => $userModel->getDeactivationReason(),
                     'created_at' => $userModel->created_at,
                     'updated_at' => $userModel->updated_at,
                 ]
@@ -497,6 +509,10 @@ class UserController extends Controller
                     'roles' => $userModel->getRolesArray(),
                     'permissions' => $userModel->getPermissionsArray(),
                     'is_admin' => $userModel->isAdmin(),
+                    'is_active' => $userModel->isActive(),
+                    'last_login_at' => $userModel->getLastLoginAt(),
+                    'deactivated_at' => $userModel->getDeactivatedAt(),
+                    'deactivation_reason' => $userModel->getDeactivationReason(),
                     'updated_at' => $userModel->updated_at,
                 ]
             ]);
@@ -929,6 +945,10 @@ class UserController extends Controller
                     'roles' => $userModel->getRolesArray(),
                     'permissions' => $userModel->getPermissionsArray(),
                     'is_admin' => $userModel->isAdmin(),
+                    'is_active' => $userModel->isActive(),
+                    'last_login_at' => $userModel->getLastLoginAt(),
+                    'deactivated_at' => $userModel->getDeactivatedAt(),
+                    'deactivation_reason' => $userModel->getDeactivationReason(),
                     'updated_at' => $userModel->updated_at,
                 ]
             ]);
@@ -939,5 +959,266 @@ class UserController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Deactivate a user account
+     *
+     * @OA\Post(
+     *     path="/api/v1/admin/users/{id}/deactivate",
+     *     summary="Deactivate user account",
+     *     description="Deactivates a user account without deleting it",
+     *     tags={"Admin"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="User ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="reason", type="string", example="User requested deactivation", description="Reason for deactivation")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User deactivated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="User deactivated successfully"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="user_id", type="integer", example=1),
+     *                 @OA\Property(property="is_active", type="boolean", example=false),
+     *                 @OA\Property(property="deactivated_at", type="string", format="date-time"),
+     *                 @OA\Property(property="deactivation_reason", type="string", example="User requested deactivation")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="User not found")
+     *         )
+     *     )
+     * )
+     */
+    public function deactivate(Request $request, string $user): JsonResponse
+    {
+        $userModel = User::find($user);
+
+        if (!$userModel) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        if (!$userModel->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User is already deactivated'
+            ], 422);
+        }
+
+        try {
+            $userModel->update([
+                'is_active' => false,
+                'deactivated_at' => now(),
+                'deactivation_reason' => $request->reason ?? 'Admin deactivated account'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User deactivated successfully',
+                'data' => [
+                    'user_id' => $userModel->id,
+                    'is_active' => false,
+                    'deactivated_at' => $userModel->deactivated_at,
+                    'deactivation_reason' => $userModel->deactivation_reason
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to deactivate user',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Activate a user account
+     *
+     * @OA\Post(
+     *     path="/api/v1/admin/users/{id}/activate",
+     *     summary="Activate user account",
+     *     description="Reactivates a previously deactivated user account",
+     *     tags={"Admin"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="User ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User activated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="User activated successfully"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="user_id", type="integer", example=1),
+     *                 @OA\Property(property="is_active", type="boolean", example=true),
+     *                 @OA\Property(property="activated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="User not found")
+     *         )
+     *     )
+     * )
+     */
+    public function activate(string $user): JsonResponse
+    {
+        $userModel = User::find($user);
+
+        if (!$userModel) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        if ($userModel->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User is already active'
+            ], 422);
+        }
+
+        try {
+            $userModel->update([
+                'is_active' => true,
+                'deactivated_at' => null,
+                'deactivation_reason' => null
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User activated successfully',
+                'data' => [
+                    'user_id' => $userModel->id,
+                    'is_active' => true,
+                    'activated_at' => now()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to activate user',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Reset user password
+     *
+     * @OA\Post(
+     *     path="/api/v1/admin/users/{id}/reset-password",
+     *     summary="Reset user password",
+     *     description="Resets a user's password to a new temporary password",
+     *     tags={"Admin"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="User ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="new_password", type="string", example="newpassword123", description="New password (optional, will generate if not provided)")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Password reset successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Password reset successfully"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="user_id", type="integer", example=1),
+     *                 @OA\Property(property="new_password", type="string", example="temp123456"),
+     *                 @OA\Property(property="reset_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="User not found")
+     *         )
+     *     )
+     * )
+     */
+    public function resetPassword(Request $request, string $user): JsonResponse
+    {
+        $userModel = User::find($user);
+
+        if (!$userModel) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        try {
+            $newPassword = $request->new_password ?? $this->generateTemporaryPassword();
+
+            $userModel->update([
+                'password' => Hash::make($newPassword)
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Password reset successfully',
+                'data' => [
+                    'user_id' => $userModel->id,
+                    'new_password' => $newPassword,
+                    'reset_at' => now()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reset password',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate a temporary password
+     */
+    private function generateTemporaryPassword(): string
+    {
+        return 'temp' . strtoupper(substr(md5(uniqid()), 0, 6));
     }
 }
