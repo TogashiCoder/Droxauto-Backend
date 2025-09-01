@@ -20,7 +20,7 @@ class UserRoleController extends Controller
     {
         try {
             $validated = $request->validate([
-                'user_id' => 'required|integer',
+                'user_id' => 'required|string|uuid',
                 'role_id' => 'required|integer',
                 'guard_name' => 'string|max:255'
             ]);
@@ -117,7 +117,7 @@ class UserRoleController extends Controller
     {
         try {
             $validated = $request->validate([
-                'user_id' => 'required|integer',
+                'user_id' => 'required|string|uuid',
                 'role_ids' => 'required|array|min:1',
                 'role_ids.*' => 'integer'
             ]);
@@ -212,7 +212,7 @@ class UserRoleController extends Controller
     {
         try {
             $validated = $request->validate([
-                'user_id' => 'required|integer',
+                'user_id' => 'required|string|uuid',
                 'role_id' => 'required|integer'
             ]);
 
@@ -309,7 +309,7 @@ class UserRoleController extends Controller
     {
         try {
             $validated = $request->validate([
-                'user_id' => 'required|integer'
+                'user_id' => 'required|string|uuid'
             ]);
 
             $user = User::find($validated['user_id']);
@@ -378,7 +378,7 @@ class UserRoleController extends Controller
     /**
      * Get user permissions (including those from roles)
      */
-    public function getUserPermissions(int $id): JsonResponse
+    public function getUserPermissions(string $id): JsonResponse
     {
         try {
             $user = User::find($id);

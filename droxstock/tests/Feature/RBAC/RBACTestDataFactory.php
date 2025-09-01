@@ -345,15 +345,15 @@ class RBACTestDataFactory
     public static function getInvalidRoleAssignmentData(): array
     {
         return [
-            'invalid_user_id' => ['user_id' => 99999, 'role_name' => 'admin'],
-            'negative_user_id' => ['user_id' => -1, 'role_name' => 'admin'],
-            'zero_user_id' => ['user_id' => 0, 'role_name' => 'admin'],
-            'string_user_id' => ['user_id' => 'invalid', 'role_name' => 'admin'],
-            'empty_role_name' => ['user_id' => 1, 'role_name' => ''],
-            'null_role_name' => ['user_id' => 1, 'role_name' => null],
-            'non_existent_role' => ['user_id' => 1, 'role_name' => 'non_existent_role'],
+            'invalid_user_id' => ['user_id' => '99999999-9999-9999-9999-999999999999', 'role_name' => 'admin'],
+            'invalid_uuid_format' => ['user_id' => 'invalid-uuid-format', 'role_name' => 'admin'],
+            'empty_user_id' => ['user_id' => '', 'role_name' => 'admin'],
+            'null_user_id' => ['user_id' => null, 'role_name' => 'admin'],
+            'empty_role_name' => ['user_id' => '550e8400-e29b-41d4-a716-446655440000', 'role_name' => ''],
+            'null_role_name' => ['user_id' => '550e8400-e29b-41d4-a716-446655440000', 'role_name' => null],
+            'non_existent_role' => ['user_id' => '550e8400-e29b-41d4-a716-446655440000', 'role_name' => 'non_existent_role'],
             'missing_user_id' => ['role_name' => 'admin'],
-            'missing_role_name' => ['user_id' => 1]
+            'missing_role_name' => ['user_id' => '550e8400-e29b-41d4-a716-446655440000']
         ];
     }
 

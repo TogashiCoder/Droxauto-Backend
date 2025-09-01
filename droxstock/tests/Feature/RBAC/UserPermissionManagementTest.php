@@ -112,7 +112,7 @@ describe('Role-Based Access Control (RBAC) Management', function () {
                 'Authorization' => 'Bearer ' . $adminData['token'],
                 'Accept' => 'application/json'
             ])->postJson('/api/v1/admin/users/assign-permission', [
-                'user_id' => 99999,
+                'user_id' => '99999999-9999-9999-9999-999999999999',
                 'permission_id' => $permission->id
             ]);
 
@@ -183,7 +183,7 @@ describe('Role-Based Access Control (RBAC) Management', function () {
                 'Authorization' => 'Bearer ' . $adminData['token'],
                 'Accept' => 'application/json'
             ])->postJson('/api/v1/admin/users/remove-permission', [
-                'user_id' => 99999,
+                'user_id' => '99999999-9999-9999-9999-999999999999',
                 'permission_id' => $permission->id
             ]);
 

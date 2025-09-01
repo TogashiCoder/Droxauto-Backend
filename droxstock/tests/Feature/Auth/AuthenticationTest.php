@@ -334,7 +334,7 @@ describe('Authentication Endpoints', function () {
 
             // Verify new refresh token is stored in cache
             $newRefreshToken = $response->json('data.refresh_token');
-            expect(Cache::get('refresh_token_' . $newRefreshToken))->toBe($user->id);
+            expect(Cache::get('refresh_token_' . $newRefreshToken))->toBe((string) $user->id);
         });
 
         it('fails refresh with missing refresh token', function () {

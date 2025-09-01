@@ -25,7 +25,7 @@ class UserManagementController extends Controller
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%");
                 });
             }
 
@@ -239,7 +239,7 @@ class UserManagementController extends Controller
             }
 
             // Prevent admin from deleting themselves
-            if ($user->id === auth()->id()) {
+            if ((string) $user->id === (string) auth()->id()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Cannot delete your own account'

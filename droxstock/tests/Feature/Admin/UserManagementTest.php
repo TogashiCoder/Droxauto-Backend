@@ -100,7 +100,7 @@ describe('Admin User Management Endpoints', function () {
 
             $users = $response->json('data.data');
             expect($users)->toHaveCount(1);
-            expect($users[0]['id'])->toBe($basicUser->id);
+            expect($users[0]['id'])->toBe((string) $basicUser->id);
         });
     });
 

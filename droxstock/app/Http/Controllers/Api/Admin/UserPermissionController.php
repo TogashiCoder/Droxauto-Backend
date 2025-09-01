@@ -20,7 +20,7 @@ class UserPermissionController extends Controller
     {
         try {
             $validated = $request->validate([
-                'user_id' => 'required|integer',
+                'user_id' => 'required|string|uuid',
                 'permission_id' => 'required|integer'
             ]);
 
@@ -116,7 +116,7 @@ class UserPermissionController extends Controller
     {
         try {
             $validated = $request->validate([
-                'user_id' => 'required|integer',
+                'user_id' => 'required|string|uuid',
                 'permission_id' => 'required|integer'
             ]);
 
@@ -221,7 +221,7 @@ class UserPermissionController extends Controller
     {
         try {
             $validated = $request->validate([
-                'user_id' => 'required|integer',
+                'user_id' => 'required|string|uuid',
                 'permission_ids' => 'required|array|min:1',
                 'permission_ids.*' => 'integer'
             ]);
@@ -314,7 +314,7 @@ class UserPermissionController extends Controller
     {
         try {
             $validated = $request->validate([
-                'user_id' => 'required|integer'
+                'user_id' => 'required|string|uuid'
             ]);
 
             $user = User::find($validated['user_id']);

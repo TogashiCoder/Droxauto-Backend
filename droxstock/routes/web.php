@@ -7,7 +7,7 @@ Route::get('/', function () {
 });
 
 // Focused Daparto API Documentation with Real Scramble UI (No Custom Blade)
-Route::get('/docs/daparto-focused-scramble', function () {
+Route::get('/docs/daparto-focused-api', function () {
     // Load the focused API specification directly
     $focusedApiPath = base_path('api-focused.json');
     if (!file_exists($focusedApiPath)) {

@@ -8,16 +8,27 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, HasRoles;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles, HasUuids;
 
     /**
      * The guard name for roles and permissions
      */
     protected $guard_name = 'api';
+
+    /**
+     * Indicates if the model's ID is auto-incrementing.
+     */
+    public $incrementing = false;
+
+    /**
+     * The data type of the auto-incrementing ID.
+     */
+    protected $keyType = 'string';
 
     /**
      * Get the route key for the model.
