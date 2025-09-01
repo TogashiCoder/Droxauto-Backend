@@ -24,26 +24,30 @@ Route::prefix('v1/register')->group(function () {
 // Protected routes
 Route::prefix('v1')->middleware(['auth:api', 'user.active'])->group(function () {
 
-    // Authentication routes (protected)
+    // Authentication routes (protected with permissions)
     Route::prefix('auth')->group(function () {
-        Route::post('logout', [AuthController::class, 'logout']);
-        Route::get('me', [AuthController::class, 'me']);
+        Route::post('logout', [AuthController::class, 'logout']); // No permission needed for logout
+        Route::get('me', [AuthController::class, 'me'])->middleware('permission:view profile'); // Requires permission to view own profile
     });
 
-    // Daparto CRUD routes (protected)
-    Route::apiResource('dapartos', DapartoController::class);
+    // Daparto CRUD routes (protected with permissions)
+    Route::get('dapartos', [DapartoController::class, 'index'])->middleware('permission:view dapartos');
+    Route::post('dapartos', [DapartoController::class, 'store'])->middleware('permission:create dapartos');
+    Route::get('dapartos/{daparto}', [DapartoController::class, 'show'])->middleware('permission:view dapartos');
+    Route::put('dapartos/{daparto}', [DapartoController::class, 'update'])->middleware('permission:edit dapartos');
+    Route::delete('dapartos/{daparto}', [DapartoController::class, 'destroy'])->middleware('permission:delete dapartos');
 
-    // Additional Daparto routes (protected)
-    Route::get('dapartos-stats', [DapartoController::class, 'stats']);
-    Route::get('dapartos-by-number/{interne_artikelnummer}', [DapartoController::class, 'getByNumber']);
-    Route::post('dapartos/{id}/restore', [DapartoController::class, 'restore']);
+    // Additional Daparto routes (protected with permissions)
+    Route::get('dapartos-stats', [DapartoController::class, 'stats'])->middleware('permission:view dapartos');
+    Route::get('dapartos-by-number/{interne_artikelnummer}', [DapartoController::class, 'getByNumber'])->middleware('permission:view dapartos');
+    Route::post('dapartos/{id}/restore', [DapartoController::class, 'restore'])->middleware('permission:edit dapartos');
 
-    // CSV processing status (protected)
-    Route::get('csv-job-status/{jobId}', [DapartoController::class, 'getCsvJobStatus']);
-    Route::post('dapartos-upload-csv', [DapartoController::class, 'uploadCsv']);
+    // CSV processing status (protected with permissions)
+    Route::get('csv-job-status/{jobId}', [DapartoController::class, 'getCsvJobStatus'])->middleware('permission:view csv status');
+    Route::post('dapartos-upload-csv', [DapartoController::class, 'uploadCsv'])->middleware('permission:upload csv');
 
-    // Data management (protected)
-    Route::delete('dapartos-delete-all', [DapartoController::class, 'deleteAll']);
+    // Data management (protected with permissions)
+    Route::delete('dapartos-delete-all', [DapartoController::class, 'deleteAll'])->middleware('permission:delete dapartos');
 
     // Admin routes (admin role required)
     Route::prefix('admin')->middleware('role:admin')->group(function () {

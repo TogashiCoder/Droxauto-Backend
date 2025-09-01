@@ -23,6 +23,7 @@ class RolePermissionSeeder extends Seeder
             'edit users',
             'delete users',
             'approve user registrations',
+            'view profile', // Permission to view own profile
 
             // Role management
             'view roles',
@@ -50,30 +51,35 @@ class RolePermissionSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission, 'guard_name' => 'api']);
+            Permission::firstOrCreate(
+                ['name' => $permission, 'guard_name' => 'api'],
+                ['name' => $permission, 'guard_name' => 'api']
+            );
         }
 
         // Create roles with explicit API guard
-        $adminRole = Role::create(['name' => 'admin', 'guard_name' => 'api']);
-        $userRole = Role::create(['name' => 'user', 'guard_name' => 'api']);
-        $managerRole = Role::create(['name' => 'manager', 'guard_name' => 'api']);
+        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'api']);
+        $userRole = Role::firstOrCreate(['name' => 'user', 'guard_name' => 'api']);
+        $managerRole = Role::firstOrCreate(['name' => 'manager', 'guard_name' => 'api']);
 
         // Assign all permissions to admin
-        $adminRole->givePermissionTo(Permission::all());
+        $adminRole->syncPermissions(Permission::all());
 
         // Basic user role with minimal permissions (for admin-created users)
-        $basicUserRole = Role::create(['name' => 'basic_user', 'guard_name' => 'api']);
-        $basicUserRole->givePermissionTo([
+        $basicUserRole = Role::firstOrCreate(['name' => 'basic_user', 'guard_name' => 'api']);
+        $basicUserRole->syncPermissions([
             'view dapartos',
             'view csv status',
+            'view profile', // All users can view their own profile
         ]);
 
         // User role has no permissions by default
-        // Self-registered users get no role and no permissions
+        // Self-registered users get no role and no permissions by default
         // Only admin-created users get specific roles and permissions
+        // NOTE: Self-registered users will be given 'view profile' permission directly in UserController
 
         // Assign manager permissions
-        $managerRole->givePermissionTo([
+        $managerRole->syncPermissions([
             'view dapartos',
             'create dapartos',
             'edit dapartos',
@@ -81,40 +87,50 @@ class RolePermissionSeeder extends Seeder
             'view csv status',
             'view users',
             'view system stats',
+            'view profile', // All users can view their own profile
         ]);
 
         // Create admin user
-        $adminUser = User::create([
-            'name' => 'Hassan Admin',
-            'email' => 'silverproduction2023@gmail.com',
-            'password' => Hash::make('droxauto_superadmin@2025'),
-            'registration_status' => 'approved',
-            'registration_date' => now(),
-            'approved_at' => now(),
-        ]);
-        $adminUser->assignRole('admin');
+        $adminUser = User::firstOrCreate(
+            ['email' => 'silverproduction2023@gmail.com'],
+            [
+                'name' => 'Hassan Admin',
+                'email' => 'silverproduction2023@gmail.com',
+                'password' => Hash::make('droxauto_superadmin@2025'),
+                'registration_status' => 'approved',
+                'registration_date' => now(),
+                'approved_at' => now(),
+            ]
+        );
+        $adminUser->syncRoles(['admin']);
 
         // Create regular user
-        $regularUser = User::create([
-            'name' => 'Daparto',
-            'email' => 'daparto@platforme.com',
-            'password' => Hash::make('daparto_Q8r!Z5vH2n'),
-            'registration_status' => 'approved',
-            'registration_date' => now(),
-            'approved_at' => now(),
-        ]);
-        $regularUser->assignRole('user');
+        $regularUser = User::firstOrCreate(
+            ['email' => 'daparto@platforme.com'],
+            [
+                'name' => 'Daparto',
+                'email' => 'daparto@platforme.com',
+                'password' => Hash::make('daparto_Q8r!Z5vH2n'),
+                'registration_status' => 'approved',
+                'registration_date' => now(),
+                'approved_at' => now(),
+            ]
+        );
+        $regularUser->syncRoles(['user']);
 
         // Create manager user
-        $managerUser = User::create([
-            'name' => 'Manager Taoufik',
-            'email' => 'taoufik.b.pro@gmail.com',
-            'password' => Hash::make('Taoufik123@///@2020'),
-            'registration_status' => 'approved',
-            'registration_date' => now(),
-            'approved_at' => now(),
-        ]);
-        $managerUser->assignRole('manager');
+        $managerUser = User::firstOrCreate(
+            ['email' => 'taoufik.b.pro@gmail.com'],
+            [
+                'name' => 'Manager Taoufik',
+                'email' => 'taoufik.b.pro@gmail.com',
+                'password' => Hash::make('Taoufik123@///@2020'),
+                'registration_status' => 'approved',
+                'registration_date' => now(),
+                'approved_at' => now(),
+            ]
+        );
+        $managerUser->syncRoles(['manager']);
 
         $this->command->info('Roles and permissions seeded successfully!');
         $this->command->info('Admin user: droxauto@gmail.com / droxauto_superadmin@2025');

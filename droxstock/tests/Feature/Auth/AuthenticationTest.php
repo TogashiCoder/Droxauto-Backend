@@ -64,10 +64,10 @@ describe('Authentication Endpoints', function () {
                 'email' => 'john.doe@example.com'
             ]);
 
-            // Verify user has no roles (as per new security requirements)
+            // Verify user has no roles but has basic view profile permission
             $user = User::where('email', 'john.doe@example.com')->first();
             expect($user->roles)->toBeEmpty();
-            expect($user->getPermissionsArray())->toBeEmpty();
+            expect($user->getPermissionsArray())->toBe(['view profile']); // Gets basic profile permission
         });
 
         it('registers user without password confirmation', function () {
@@ -434,6 +434,7 @@ describe('Authentication Endpoints', function () {
     describe('User Profile', function () {
         it('successfully retrieves authenticated user profile', function () {
             $user = User::factory()->create();
+            $user->givePermissionTo('view profile'); // Give permission to view their own profile
             $this->actingAs($user, 'api');
 
             $response = $this->getJson('/api/v1/auth/me');
@@ -473,8 +474,19 @@ describe('Authentication Endpoints', function () {
             $response->assertStatus(401);
         });
 
+        it('fails to retrieve profile without view profile permission', function () {
+            $user = User::factory()->create();
+            // Don't give any permissions - should get 403
+            $this->actingAs($user, 'api');
+
+            $response = $this->getJson('/api/v1/auth/me');
+
+            $response->assertStatus(403);
+        });
+
         it('returns correct roles and permissions for user without roles', function () {
             $user = User::factory()->create();
+            $user->givePermissionTo('view profile'); // Give permission to view their own profile
             $this->actingAs($user, 'api');
 
             $response = $this->getJson('/api/v1/auth/me');

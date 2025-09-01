@@ -35,6 +35,7 @@ abstract class TestCase extends BaseTestCase
             'create users',
             'edit users',
             'delete users',
+            'view profile', // Permission to view own profile
 
             // Role management
             'view roles',
@@ -76,6 +77,7 @@ abstract class TestCase extends BaseTestCase
         $basicUserRole->givePermissionTo([
             'view dapartos',
             'view csv status',
+            'view profile', // All users can view their own profile
         ]);
 
         $managerRole->givePermissionTo([
@@ -86,6 +88,7 @@ abstract class TestCase extends BaseTestCase
             'view csv status',
             'view users',
             'view system stats',
+            'view profile', // All users can view their own profile
         ]);
     }
 

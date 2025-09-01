@@ -106,7 +106,10 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            // No role assigned - user has no permissions until admin grants them
+            // Give basic permission to view own profile (all users need this)
+            $user->givePermissionTo('view profile');
+
+            // No role assigned - user has minimal permissions until admin grants them
 
             // Create access token
             $token = $user->createToken('AuthToken');
