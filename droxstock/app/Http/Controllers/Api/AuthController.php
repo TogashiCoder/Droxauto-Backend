@@ -109,7 +109,8 @@ class AuthController extends Controller
             // No role assigned - user has no permissions until admin grants them
 
             // Create access token
-            $accessToken = $user->createToken('AuthToken')->accessToken;
+            $token = $user->createToken('AuthToken');
+            $accessToken = $token->plainTextToken;
 
             // Create a custom refresh token (UUID)
             $refreshToken = \Illuminate\Support\Str::uuid();
@@ -243,7 +244,8 @@ class AuthController extends Controller
             $user = Auth::user();
 
             // Create access token
-            $accessToken = $user->createToken('AuthToken')->accessToken;
+            $token = $user->createToken('AuthToken');
+            $accessToken = $token->plainTextToken;
 
             // Create a custom refresh token (UUID)
             $refreshToken = \Illuminate\Support\Str::uuid();
@@ -525,7 +527,8 @@ class AuthController extends Controller
             $user->tokens()->delete();
 
             // Create new access token
-            $accessToken = $user->createToken('AuthToken')->accessToken;
+            $token = $user->createToken('AuthToken');
+            $accessToken = $token->plainTextToken;
 
             // Create new refresh token
             $newRefreshToken = \Illuminate\Support\Str::uuid();

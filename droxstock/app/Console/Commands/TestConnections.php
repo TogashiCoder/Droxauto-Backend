@@ -29,7 +29,7 @@ class TestConnections extends Command
     public function handle()
     {
         $type = $this->option('type');
-        
+
         $this->info('🔍 Testing Connections...');
         $this->newLine();
 
@@ -50,20 +50,20 @@ class TestConnections extends Command
     private function testSMTPConnection(): void
     {
         $this->info('📧 Testing SMTP Connection...');
-        
+
         try {
             // Check configuration
             $this->checkSMTPConfiguration();
-            
+
             // Test actual email sending
             $this->testEmailSending();
-            
+
             $this->info('✅ SMTP connection successful!');
-            
+
         } catch (Exception $e) {
             $this->error('❌ SMTP connection failed: ' . $e->getMessage());
         }
-        
+
         $this->newLine();
     }
 
@@ -73,7 +73,7 @@ class TestConnections extends Command
     private function checkSMTPConfiguration(): void
     {
         $this->line('  Checking SMTP configuration...');
-        
+
         $configs = [
             'MAIL_MAILER' => config('mail.default'),
             'MAIL_HOST' => config('mail.mailers.smtp.host'),
@@ -89,7 +89,7 @@ class TestConnections extends Command
             }
             $this->line("    ✓ {$key}: {$value}");
         }
-        
+
         $this->line('  ✓ SMTP configuration is complete');
     }
 
@@ -99,15 +99,15 @@ class TestConnections extends Command
     private function testEmailSending(): void
     {
         $this->line('  Testing email sending...');
-        
+
         $testEmail = 'test@example.com';
-        
+
         Mail::raw('SMTP Connection Test - ' . now(), function($message) use ($testEmail) {
             $message->to($testEmail)
                     ->subject('SMTP Connection Test')
                     ->from(config('mail.from.address'), config('mail.from.name'));
         });
-        
+
         $this->line('  ✓ Test email sent successfully');
     }
 
@@ -117,20 +117,20 @@ class TestConnections extends Command
     private function testAWSConnection(): void
     {
         $this->info('☁️  Testing AWS Connection...');
-        
+
         try {
             // Check configuration
             $this->checkAWSConfiguration();
-            
+
             // Test S3 client creation
             $this->testS3Client();
-            
+
             $this->info('✅ AWS connection successful!');
-            
+
         } catch (Exception $e) {
             $this->error('❌ AWS connection failed: ' . $e->getMessage());
         }
-        
+
         $this->newLine();
     }
 
@@ -140,7 +140,7 @@ class TestConnections extends Command
     private function checkAWSConfiguration(): void
     {
         $this->line('  Checking AWS configuration...');
-        
+
         $configs = [
             'AWS_ACCESS_KEY_ID' => env('AWS_ACCESS_KEY_ID'),
             'AWS_SECRET_ACCESS_KEY' => env('AWS_SECRET_ACCESS_KEY'),
@@ -152,14 +152,14 @@ class TestConnections extends Command
             if (empty($value) && $key !== 'AWS_BUCKET') {
                 throw new Exception("Missing AWS configuration: {$key}");
             }
-            
+
             if ($key === 'AWS_SECRET_ACCESS_KEY') {
                 $this->line("    ✓ {$key}: " . str_repeat('*', 8) . substr($value, -4));
             } else {
                 $this->line("    ✓ {$key}: {$value}");
             }
         }
-        
+
         $this->line('  ✓ AWS configuration is complete');
     }
 
@@ -169,12 +169,12 @@ class TestConnections extends Command
     private function testS3Client(): void
     {
         $this->line('  Testing S3 client creation...');
-        
+
         // Check if AWS SDK is available
         if (!class_exists('Aws\S3\S3Client')) {
             throw new Exception('AWS SDK not installed. Run: composer require aws/aws-sdk-php');
         }
-        
+
         $s3Client = new \Aws\S3\S3Client([
             'version' => 'latest',
             'region'  => env('AWS_DEFAULT_REGION'),
@@ -183,14 +183,14 @@ class TestConnections extends Command
                 'secret' => env('AWS_SECRET_ACCESS_KEY'),
             ],
         ]);
-        
+
         $this->line('  ✓ S3 client created successfully');
-        
+
         // Test bucket access if configured
         $bucket = env('AWS_BUCKET');
         if (!empty($bucket)) {
             $this->line('  Testing bucket access...');
-            
+
             try {
                 $result = $s3Client->listObjectsV2([
                     'Bucket' => $bucket,
