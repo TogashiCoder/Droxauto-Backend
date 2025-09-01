@@ -87,11 +87,19 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is admin
+     * Check if user is admin (dynamic)
      */
     public function isAdmin(): bool
     {
-        return $this->hasRole('admin');
+        return \App\Services\RoleConfigService::userIsAdmin($this);
+    }
+
+    /**
+     * Check if user is manager (dynamic)
+     */
+    public function isManager(): bool
+    {
+        return \App\Services\RoleConfigService::userIsManager($this);
     }
 
     /**

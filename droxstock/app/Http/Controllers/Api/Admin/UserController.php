@@ -210,8 +210,8 @@ class UserController extends Controller
             if ($request->has('roles')) {
                 $user->syncRoles($request->roles);
             } else {
-                // Assign basic user role with minimal permissions
-                $user->assignRole('basic_user');
+                // Assign default role for admin-created users (dynamic)
+                \App\Services\RoleConfigService::assignDefaultAdminCreatedRole($user);
             }
 
             $user->load('roles');
@@ -614,8 +614,8 @@ class UserController extends Controller
             }
 
             // 3. Last admin protection (CRITICAL)
-            if ($userToDelete->hasRole('admin')) {
-                $adminCount = User::role('admin')->count();
+            if (\App\Services\RoleConfigService::userIsAdmin($userToDelete)) {
+                $adminCount = User::role(\App\Services\RoleConfigService::getAdminRole())->count();
 
                 if ($adminCount <= 1) {
                     return response()->json([
@@ -629,7 +629,7 @@ class UserController extends Controller
             }
 
             // 4. Role-based deletion permissions (SECURITY)
-            if ($userToDelete->hasRole('admin') && !$currentUser->hasRole('admin')) {
+            if (\App\Services\RoleConfigService::userIsAdmin($userToDelete) && !\App\Services\RoleConfigService::userIsAdmin($currentUser)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Insufficient permissions to delete admin account',
@@ -640,7 +640,7 @@ class UserController extends Controller
             }
 
             // 5. Prevent deletion of system-critical users (BUSINESS LOGIC)
-            if ($userToDelete->email === 'admin@example.com' && $userToDelete->hasRole('admin')) {
+            if ($userToDelete->email === 'admin@example.com' && \App\Services\RoleConfigService::userIsAdmin($userToDelete)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Cannot delete primary system administrator',

@@ -50,7 +50,7 @@ Route::prefix('v1')->middleware(['auth:api', 'user.active'])->group(function () 
     Route::delete('dapartos-delete-all', [DapartoController::class, 'deleteAll'])->middleware('permission:delete dapartos');
 
     // Admin routes (admin role required)
-    Route::prefix('admin')->middleware('role:admin')->group(function () {
+    Route::prefix('admin')->middleware(\App\Services\RoleConfigService::getAdminMiddleware())->group(function () {
 
         // Pending users management
         Route::get('pending-users', [\App\Http\Controllers\Api\Admin\PendingUsersController::class, 'index']);
@@ -71,7 +71,7 @@ Route::prefix('v1')->middleware(['auth:api', 'user.active'])->group(function () 
 });
 
 // RBAC Management Routes
-Route::prefix('v1/admin')->middleware(['auth:api', 'user.active', 'role:admin'])->group(function () {
+Route::prefix('v1/admin')->middleware(['auth:api', 'user.active', \App\Services\RoleConfigService::getAdminMiddleware()])->group(function () {
 
     // Role Management
     Route::apiResource('roles', \App\Http\Controllers\Api\Admin\RoleController::class)->names([

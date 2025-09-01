@@ -66,10 +66,14 @@ abstract class TestCase extends BaseTestCase
             Permission::create(['name' => $permission, 'guard_name' => 'api']);
         }
 
-        // Create roles
-        $adminRole = Role::create(['name' => 'admin', 'guard_name' => 'api']);
-        $basicUserRole = Role::create(['name' => 'basic_user', 'guard_name' => 'api']);
-        $managerRole = Role::create(['name' => 'manager', 'guard_name' => 'api']);
+        // Create roles (dynamic)
+        $adminRoleName = \App\Services\RoleConfigService::getAdminRole();
+        $basicUserRoleName = \App\Services\RoleConfigService::getBasicUserRole();
+        $managerRoleName = \App\Services\RoleConfigService::getManagerRole();
+
+        $adminRole = Role::create(['name' => $adminRoleName, 'guard_name' => 'api']);
+        $basicUserRole = Role::create(['name' => $basicUserRoleName, 'guard_name' => 'api']);
+        $managerRole = Role::create(['name' => $managerRoleName, 'guard_name' => 'api']);
 
         // Assign permissions to roles
         $adminRole->givePermissionTo(Permission::all());
@@ -99,7 +103,7 @@ abstract class TestCase extends BaseTestCase
     {
         /** @var User $user */
         $user = User::factory()->create();
-        $user->assignRole('admin');
+        \App\Services\RoleConfigService::assignAdminRole($user);
         $this->actingAs($user, 'api');
         return $user;
     }
@@ -111,7 +115,7 @@ abstract class TestCase extends BaseTestCase
     {
         /** @var User $user */
         $user = User::factory()->create();
-        $user->assignRole('basic_user');
+        \App\Services\RoleConfigService::assignBasicUserRole($user);
         $this->actingAs($user, 'api');
         return $user;
     }
@@ -123,7 +127,7 @@ abstract class TestCase extends BaseTestCase
     {
         /** @var User $user */
         $user = User::factory()->create();
-        $user->assignRole('manager');
+        \App\Services\RoleConfigService::assignManagerRole($user);
         $this->actingAs($user, 'api');
         return $user;
     }
@@ -135,7 +139,7 @@ abstract class TestCase extends BaseTestCase
     {
         /** @var User $user */
         $user = User::factory()->create();
-        $user->assignRole('admin');
+        \App\Services\RoleConfigService::assignAdminRole($user);
         $token = $user->createToken('TestToken');
 
         return [

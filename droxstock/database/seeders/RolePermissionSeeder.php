@@ -57,16 +57,19 @@ class RolePermissionSeeder extends Seeder
             );
         }
 
-        // Create roles with explicit API guard
-        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'api']);
-        $userRole = Role::firstOrCreate(['name' => 'user', 'guard_name' => 'api']);
-        $managerRole = Role::firstOrCreate(['name' => 'manager', 'guard_name' => 'api']);
+        // Create roles with explicit API guard (dynamic)
+        $adminRoleName = \App\Services\RoleConfigService::getAdminRole();
+        $userRoleName = \App\Services\RoleConfigService::getUserRole();
+        $managerRoleName = \App\Services\RoleConfigService::getManagerRole();
+        $basicUserRoleName = \App\Services\RoleConfigService::getBasicUserRole();
+
+        $adminRole = Role::firstOrCreate(['name' => $adminRoleName, 'guard_name' => 'api']);
+        $userRole = Role::firstOrCreate(['name' => $userRoleName, 'guard_name' => 'api']);
+        $managerRole = Role::firstOrCreate(['name' => $managerRoleName, 'guard_name' => 'api']);
+        $basicUserRole = Role::firstOrCreate(['name' => $basicUserRoleName, 'guard_name' => 'api']);
 
         // Assign all permissions to admin
         $adminRole->syncPermissions(Permission::all());
-
-        // Basic user role with minimal permissions (for admin-created users)
-        $basicUserRole = Role::firstOrCreate(['name' => 'basic_user', 'guard_name' => 'api']);
         $basicUserRole->syncPermissions([
             'view dapartos',
             'view csv status',
@@ -102,7 +105,7 @@ class RolePermissionSeeder extends Seeder
                 'approved_at' => now(),
             ]
         );
-        $adminUser->syncRoles(['admin']);
+        $adminUser->syncRoles([$adminRoleName]);
 
         // Create regular user
         $regularUser = User::firstOrCreate(
@@ -116,7 +119,7 @@ class RolePermissionSeeder extends Seeder
                 'approved_at' => now(),
             ]
         );
-        $regularUser->syncRoles(['user']);
+        $regularUser->syncRoles([$userRoleName]);
 
         // Create manager user
         $managerUser = User::firstOrCreate(
@@ -130,7 +133,7 @@ class RolePermissionSeeder extends Seeder
                 'approved_at' => now(),
             ]
         );
-        $managerUser->syncRoles(['manager']);
+        $managerUser->syncRoles([$managerRoleName]);
 
         $this->command->info('Roles and permissions seeded successfully!');
         $this->command->info('Admin user: droxauto@gmail.com / droxauto_superadmin@2025');

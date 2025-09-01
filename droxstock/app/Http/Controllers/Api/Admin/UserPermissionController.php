@@ -158,7 +158,7 @@ class UserPermissionController extends Controller
                 'permission_name' => $permission->name,
                 'user_id' => $user->id,
                 'is_critical' => $isCritical,
-                'user_has_admin_role' => $user->hasRole('admin')
+                'user_has_admin_role' => \App\Services\RoleConfigService::userIsAdmin($user)
             ]);
 
             if ($isCritical) {
@@ -329,7 +329,7 @@ class UserPermissionController extends Controller
             $currentPermissions = $user->getDirectPermissions();
 
             // Prevent removing all permissions from admin users
-            if ($user->hasRole('admin') && $this->hasCriticalPermissions($user)) {
+            if (\App\Services\RoleConfigService::userIsAdmin($user) && $this->hasCriticalPermissions($user)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Cannot remove all permissions from admin users with critical permissions'
@@ -385,7 +385,7 @@ class UserPermissionController extends Controller
      */
     private function hasCriticalPermissions(User $user): bool
     {
-        if (!$user->hasRole('admin')) {
+        if (!\App\Services\RoleConfigService::userIsAdmin($user)) {
             return false;
         }
 
@@ -417,7 +417,7 @@ class UserPermissionController extends Controller
     private function isCriticalPermissionForAdmin(Permission $permission, User $user): bool
     {
         // Check if user has admin role
-        if (!$user->hasRole('admin')) {
+        if (!\App\Services\RoleConfigService::userIsAdmin($user)) {
             Log::info('User does not have admin role', ['user_id' => $user->id]);
             return false;
         }
