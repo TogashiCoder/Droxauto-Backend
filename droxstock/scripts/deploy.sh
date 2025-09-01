@@ -105,31 +105,31 @@ HEALTH_CHECK=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/health)
 
 if [ "$HEALTH_CHECK" = "200" ]; then
     print_status "Deployment completed successfully! ✨"
-    
+
     # Show container status
     echo ""
     echo "Container Status:"
     docker-compose ps
-    
+
     # Show recent logs
     echo ""
     echo "Recent application logs:"
     docker-compose logs --tail=20 app
 else
     print_error "Health check failed! HTTP Status: $HEALTH_CHECK"
-    
+
     # Show error logs
     echo ""
     echo "Error logs:"
     docker-compose logs --tail=50 app
-    
+
     # Rollback option
     read -p "Do you want to rollback to previous version? (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         ./scripts/rollback.sh
     fi
-    
+
     exit 1
 fi
 

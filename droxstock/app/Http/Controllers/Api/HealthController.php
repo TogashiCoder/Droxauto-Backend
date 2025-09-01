@@ -77,7 +77,7 @@ class HealthController extends Controller
         $diskFree = disk_free_space('/');
         $diskTotal = disk_total_space('/');
         $diskUsagePercent = round((($diskTotal - $diskFree) / $diskTotal) * 100, 2);
-        
+
         $health['services']['disk'] = [
             'status' => $diskUsagePercent < 90 ? 'up' : 'warning',
             'usage_percent' => $diskUsagePercent,
@@ -88,7 +88,7 @@ class HealthController extends Controller
         // Check memory
         $memoryUsage = memory_get_usage(true);
         $memoryPeak = memory_get_peak_usage(true);
-        
+
         $health['services']['memory'] = [
             'status' => 'up',
             'current_mb' => round($memoryUsage / 1048576, 2),
