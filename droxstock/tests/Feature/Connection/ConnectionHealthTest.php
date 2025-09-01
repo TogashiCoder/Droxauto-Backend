@@ -119,7 +119,7 @@ class ConnectionHealthTest extends TestCase
         ];
 
         foreach ($requiredConfigs as $key => $expectedValue) {
-            $actualValue = env($key);
+            $actualValue = config("aws.{$key}");
 
             if ($key === 'AWS_SECRET_ACCESS_KEY') {
                 // Don't expose secret key in test output
@@ -138,10 +138,10 @@ class ConnectionHealthTest extends TestCase
         try {
             $s3Client = new S3Client([
                 'version' => 'latest',
-                'region'  => env('AWS_DEFAULT_REGION'),
+                'region'  => config('aws.default_region'),
                 'credentials' => [
-                    'key'    => env('AWS_ACCESS_KEY_ID'),
-                    'secret' => env('AWS_SECRET_ACCESS_KEY'),
+                    'key'    => config('aws.credentials.key'),
+                    'secret' => config('aws.credentials.secret'),
                 ],
             ]);
 
@@ -157,7 +157,7 @@ class ConnectionHealthTest extends TestCase
      */
     private function assertBucketAccess(): void
     {
-        $bucket = env('AWS_BUCKET');
+        $bucket = config('aws.bucket');
 
         if (empty($bucket)) {
             $this->markTestSkipped('AWS_BUCKET not configured - skipping bucket access test');
@@ -167,10 +167,10 @@ class ConnectionHealthTest extends TestCase
         try {
             $s3Client = new S3Client([
                 'version' => 'latest',
-                'region'  => env('AWS_DEFAULT_REGION'),
+                'region'  => config('aws.default_region'),
                 'credentials' => [
-                    'key'    => env('AWS_ACCESS_KEY_ID'),
-                    'secret' => env('AWS_SECRET_ACCESS_KEY'),
+                    'key'    => config('aws.credentials.key'),
+                    'secret' => config('aws.credentials.secret'),
                 ],
             ]);
 

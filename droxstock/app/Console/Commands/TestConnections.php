@@ -142,10 +142,10 @@ class TestConnections extends Command
         $this->line('  Checking AWS configuration...');
 
         $configs = [
-            'AWS_ACCESS_KEY_ID' => env('AWS_ACCESS_KEY_ID'),
-            'AWS_SECRET_ACCESS_KEY' => env('AWS_SECRET_ACCESS_KEY'),
-            'AWS_DEFAULT_REGION' => env('AWS_DEFAULT_REGION'),
-            'AWS_BUCKET' => env('AWS_BUCKET')
+            'AWS_ACCESS_KEY_ID' => config('aws.credentials.key'),
+            'AWS_SECRET_ACCESS_KEY' => config('aws.credentials.secret'),
+            'AWS_DEFAULT_REGION' => config('aws.default_region'),
+            'AWS_BUCKET' => config('aws.bucket')
         ];
 
         foreach ($configs as $key => $value) {
@@ -177,17 +177,17 @@ class TestConnections extends Command
 
         $s3Client = new \Aws\S3\S3Client([
             'version' => 'latest',
-            'region'  => env('AWS_DEFAULT_REGION'),
+            'region'  => config('aws.default_region'),
             'credentials' => [
-                'key'    => env('AWS_ACCESS_KEY_ID'),
-                'secret' => env('AWS_SECRET_ACCESS_KEY'),
+                'key'    => config('aws.credentials.key'),
+                'secret' => config('aws.credentials.secret'),
             ],
         ]);
 
         $this->line('  ✓ S3 client created successfully');
 
         // Test bucket access if configured
-        $bucket = env('AWS_BUCKET');
+        $bucket = config('aws.bucket');
         if (!empty($bucket)) {
             $this->line('  Testing bucket access...');
 
