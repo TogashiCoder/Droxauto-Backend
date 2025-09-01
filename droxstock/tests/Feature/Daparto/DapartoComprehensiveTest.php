@@ -66,7 +66,7 @@ class DapartoComprehensiveTest extends TestCase
         Storage::fake('local');
     }
 
-    private function createAdminUser(): User
+    protected function createAdminUser(): User
     {
         $adminRole = Role::where('name', 'admin')->first();
         $user = User::factory()->create();
@@ -74,7 +74,7 @@ class DapartoComprehensiveTest extends TestCase
         return $user;
     }
 
-    private function createBasicUser(): User
+    protected function createBasicUser(): User
     {
         $basicRole = Role::where('name', 'basic_user')->first();
         $user = User::factory()->create();

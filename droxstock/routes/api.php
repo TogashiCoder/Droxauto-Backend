@@ -14,6 +14,13 @@ Route::prefix('v1/auth')->group(function () {
     Route::post('refresh', [AuthController::class, 'refresh']); // Public refresh endpoint
 });
 
+// Public user registration routes (no authentication required)
+Route::prefix('v1/register')->group(function () {
+    Route::post('user', [\App\Http\Controllers\Api\Auth\UserRegistrationController::class, 'register']);
+    Route::get('status', [\App\Http\Controllers\Api\Auth\UserRegistrationController::class, 'checkStatus']);
+    Route::post('resend-verification', [\App\Http\Controllers\Api\Auth\UserRegistrationController::class, 'resendVerification']);
+});
+
 // Protected routes
 Route::prefix('v1')->middleware(['auth:api', 'user.active'])->group(function () {
 
@@ -41,13 +48,21 @@ Route::prefix('v1')->middleware(['auth:api', 'user.active'])->group(function () 
     // Admin routes (admin role required)
     Route::prefix('admin')->middleware('role:admin')->group(function () {
 
+        // Pending users management
+        Route::get('pending-users', [\App\Http\Controllers\Api\Admin\PendingUsersController::class, 'index']);
+        Route::get('pending-users/{id}', [\App\Http\Controllers\Api\Admin\PendingUsersController::class, 'show']);
+        Route::post('pending-users/{id}/approve', [\App\Http\Controllers\Api\Admin\PendingUsersController::class, 'approve']);
+        Route::post('pending-users/{id}/reject', [\App\Http\Controllers\Api\Admin\PendingUsersController::class, 'reject']);
+        Route::get('pending-users-statistics', [\App\Http\Controllers\Api\Admin\PendingUsersController::class, 'statistics']);
+
         // User management
-        Route::apiResource('users', UserController::class);
-        Route::get('users/{user}/roles', [UserController::class, 'roles']);
-        Route::put('users/{user}/roles', [UserController::class, 'updateRoles']);
-        Route::post('users/{user}/deactivate', [UserController::class, 'deactivate']);
-        Route::post('users/{user}/activate', [UserController::class, 'activate']);
-        Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword']);
+        Route::get('users', [\App\Http\Controllers\Api\Admin\UserManagementController::class, 'index']);
+        Route::get('users/{userId}', [\App\Http\Controllers\Api\Admin\UserManagementController::class, 'show']);
+        Route::post('users', [\App\Http\Controllers\Api\Admin\UserManagementController::class, 'store']);
+        Route::put('users/{userId}', [\App\Http\Controllers\Api\Admin\UserManagementController::class, 'update']);
+        Route::delete('users/{userId}', [\App\Http\Controllers\Api\Admin\UserManagementController::class, 'destroy']);
+        Route::get('users/{userId}/roles', [\App\Http\Controllers\Api\Admin\UserManagementController::class, 'getUserRoles']);
+        Route::put('users/{userId}/roles', [\App\Http\Controllers\Api\Admin\UserManagementController::class, 'updateUserRoles']);
     });
 });
 

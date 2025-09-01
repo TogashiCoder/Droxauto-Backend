@@ -22,6 +22,7 @@ class RolePermissionSeeder extends Seeder
             'create users',
             'edit users',
             'delete users',
+            'approve user registrations',
 
             // Role management
             'view roles',

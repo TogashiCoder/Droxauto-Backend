@@ -40,6 +40,11 @@ class User extends Authenticatable
         'last_login_at',
         'deactivated_at',
         'deactivation_reason',
+        'registration_status',
+        'registration_date',
+        'admin_notes',
+        'approved_at',
+        'rejected_at',
     ];
 
     /**
@@ -62,6 +67,11 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'registration_date' => 'datetime',
+            'approved_at' => 'datetime',
+            'rejected_at' => 'datetime',
+            'deactivated_at' => 'datetime',
+            'last_login_at' => 'datetime',
         ];
     }
 
