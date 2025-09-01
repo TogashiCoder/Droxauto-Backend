@@ -27,7 +27,6 @@ class ConnectionHealthTest extends TestCase
             $this->assertEmailSending();
 
             $this->assertTrue(true, 'SMTP connection and email sending working correctly');
-
         } catch (Exception $e) {
             $this->fail('SMTP test failed: ' . $e->getMessage());
         }
@@ -51,7 +50,6 @@ class ConnectionHealthTest extends TestCase
             $this->assertBucketAccess();
 
             $this->assertTrue(true, 'AWS S3 connection and bucket access working correctly');
-
         } catch (Exception $e) {
             $this->fail('AWS S3 test failed: ' . $e->getMessage());
         }
@@ -94,14 +92,13 @@ class ConnectionHealthTest extends TestCase
 
         try {
             // This will actually attempt to send an email
-            Mail::raw('SMTP Connection Test - ' . now(), function($message) use ($testEmail) {
+            Mail::raw('SMTP Connection Test - ' . now(), function ($message) use ($testEmail) {
                 $message->to($testEmail)
-                        ->subject('SMTP Connection Test')
-                        ->from(config('mail.from.address'), config('mail.from.name'));
+                    ->subject('SMTP Connection Test')
+                    ->from(config('mail.from.address'), config('mail.from.name'));
             });
 
             $this->assertTrue(true, 'Email sent successfully');
-
         } catch (Exception $e) {
             $this->fail('Email sending failed: ' . $e->getMessage());
         }
@@ -146,7 +143,6 @@ class ConnectionHealthTest extends TestCase
             ]);
 
             $this->assertInstanceOf(S3Client::class, $s3Client, 'S3 client created successfully');
-
         } catch (AwsException $e) {
             $this->fail('S3 client creation failed: ' . $e->getMessage());
         }
@@ -181,7 +177,6 @@ class ConnectionHealthTest extends TestCase
             ]);
 
             $this->assertTrue(true, 'Bucket access successful');
-
         } catch (AwsException $e) {
             $this->fail('Bucket access failed: ' . $e->getMessage());
         }

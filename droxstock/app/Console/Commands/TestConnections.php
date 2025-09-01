@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Artisan;
 use Exception;
 
 class TestConnections extends Command
@@ -33,6 +34,9 @@ class TestConnections extends Command
         $this->info('🔍 Testing Connections...');
         $this->newLine();
 
+        // Clear caches before testing
+        $this->clearCaches();
+
         if ($type === 'all' || $type === 'smtp') {
             $this->testSMTPConnection();
         }
@@ -42,6 +46,26 @@ class TestConnections extends Command
         }
 
         $this->info('✅ Connection testing completed!');
+    }
+
+    /**
+     * Clear necessary caches before testing
+     */
+    private function clearCaches(): void
+    {
+        $this->line('🧹 Clearing caches...');
+
+        try {
+            Artisan::call('config:clear');
+            $this->line('  ✓ Config cache cleared');
+
+            Artisan::call('cache:clear');
+            $this->line('  ✓ Application cache cleared');
+        } catch (Exception $e) {
+            $this->warn('  ⚠️  Cache clearing failed: ' . $e->getMessage());
+        }
+
+        $this->newLine();
     }
 
     /**
@@ -59,7 +83,6 @@ class TestConnections extends Command
             $this->testEmailSending();
 
             $this->info('✅ SMTP connection successful!');
-
         } catch (Exception $e) {
             $this->error('❌ SMTP connection failed: ' . $e->getMessage());
         }
@@ -74,20 +97,39 @@ class TestConnections extends Command
     {
         $this->line('  Checking SMTP configuration...');
 
+        // Get the actual SMTP mailer configuration
+        $smtpConfig = config('mail.mailers.smtp');
+
+        if (!$smtpConfig) {
+            throw new Exception('SMTP mailer configuration not found');
+        }
+
         $configs = [
             'MAIL_MAILER' => config('mail.default'),
-            'MAIL_HOST' => config('mail.mailers.smtp.host'),
-            'MAIL_PORT' => config('mail.mailers.smtp.port'),
-            'MAIL_USERNAME' => config('mail.mailers.smtp.username'),
-            'MAIL_ENCRYPTION' => config('mail.mailers.smtp.encryption'),
+            'MAIL_HOST' => $smtpConfig['host'] ?? null,
+            'MAIL_PORT' => $smtpConfig['port'] ?? null,
+            'MAIL_USERNAME' => $smtpConfig['username'] ?? null,
+            'MAIL_ENCRYPTION' => $smtpConfig['encryption'] ?? null,
             'MAIL_FROM_ADDRESS' => config('mail.from.address')
         ];
 
+        // Debug: Show all config values
+        $this->line('  Debug - All config values:');
+        foreach ($configs as $key => $value) {
+            $status = $value ? '✓' : '❌';
+            $this->line("    {$status} {$key}: " . ($value ?: 'NULL/EMPTY'));
+        }
+
+        // Check for missing values
+        $missing = [];
         foreach ($configs as $key => $value) {
             if (empty($value)) {
-                throw new Exception("Missing SMTP configuration: {$key}");
+                $missing[] = $key;
             }
-            $this->line("    ✓ {$key}: {$value}");
+        }
+
+        if (!empty($missing)) {
+            throw new Exception("Missing SMTP configuration: " . implode(', ', $missing));
         }
 
         $this->line('  ✓ SMTP configuration is complete');
@@ -102,10 +144,10 @@ class TestConnections extends Command
 
         $testEmail = 'test@example.com';
 
-        Mail::raw('SMTP Connection Test - ' . now(), function($message) use ($testEmail) {
+        Mail::raw('SMTP Connection Test - ' . now(), function ($message) use ($testEmail) {
             $message->to($testEmail)
-                    ->subject('SMTP Connection Test')
-                    ->from(config('mail.from.address'), config('mail.from.name'));
+                ->subject('SMTP Connection Test')
+                ->from(config('mail.from.address'), config('mail.from.name'));
         });
 
         $this->line('  ✓ Test email sent successfully');
@@ -126,7 +168,6 @@ class TestConnections extends Command
             $this->testS3Client();
 
             $this->info('✅ AWS connection successful!');
-
         } catch (Exception $e) {
             $this->error('❌ AWS connection failed: ' . $e->getMessage());
         }
@@ -141,23 +182,37 @@ class TestConnections extends Command
     {
         $this->line('  Checking AWS configuration...');
 
+        // Since Laravel doesn't have built-in AWS config, use env() directly
+        // but with better error reporting
         $configs = [
-            'AWS_ACCESS_KEY_ID' => config('aws.credentials.key'),
-            'AWS_SECRET_ACCESS_KEY' => config('aws.credentials.secret'),
-            'AWS_DEFAULT_REGION' => config('aws.default_region'),
-            'AWS_BUCKET' => config('aws.bucket')
+            'AWS_ACCESS_KEY_ID' => env('AWS_ACCESS_KEY_ID'),
+            'AWS_SECRET_ACCESS_KEY' => env('AWS_SECRET_ACCESS_KEY'),
+            'AWS_DEFAULT_REGION' => env('AWS_DEFAULT_REGION'),
+            'AWS_BUCKET' => env('AWS_BUCKET')
         ];
 
+        // Debug: Show all config values
+        $this->line('  Debug - All AWS values:');
+        foreach ($configs as $key => $value) {
+            if ($key === 'AWS_SECRET_ACCESS_KEY') {
+                $status = $value ? '✓' : '❌';
+                $this->line("    {$status} {$key}: " . ($value ? str_repeat('*', 8) . substr($value, -4) : 'NULL/EMPTY'));
+            } else {
+                $status = $value ? '✓' : '❌';
+                $this->line("    {$status} {$key}: " . ($value ?: 'NULL/EMPTY'));
+            }
+        }
+
+        // Check for missing required values
+        $missing = [];
         foreach ($configs as $key => $value) {
             if (empty($value) && $key !== 'AWS_BUCKET') {
-                throw new Exception("Missing AWS configuration: {$key}");
+                $missing[] = $key;
             }
+        }
 
-            if ($key === 'AWS_SECRET_ACCESS_KEY') {
-                $this->line("    ✓ {$key}: " . str_repeat('*', 8) . substr($value, -4));
-            } else {
-                $this->line("    ✓ {$key}: {$value}");
-            }
+        if (!empty($missing)) {
+            throw new Exception("Missing AWS configuration: " . implode(', ', $missing));
         }
 
         $this->line('  ✓ AWS configuration is complete');
@@ -177,17 +232,17 @@ class TestConnections extends Command
 
         $s3Client = new \Aws\S3\S3Client([
             'version' => 'latest',
-            'region'  => config('aws.default_region'),
+            'region'  => env('AWS_DEFAULT_REGION'),
             'credentials' => [
-                'key'    => config('aws.credentials.key'),
-                'secret' => config('aws.credentials.secret'),
+                'key'    => env('AWS_ACCESS_KEY_ID'),
+                'secret' => env('AWS_SECRET_ACCESS_KEY'),
             ],
         ]);
 
         $this->line('  ✓ S3 client created successfully');
 
         // Test bucket access if configured
-        $bucket = config('aws.bucket');
+        $bucket = env('AWS_BUCKET');
         if (!empty($bucket)) {
             $this->line('  Testing bucket access...');
 

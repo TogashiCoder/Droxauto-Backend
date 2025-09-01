@@ -105,8 +105,10 @@ return [
      * Extend Scramble with custom extensions.
      */
     'extensions' => [
-        // \App\Scramble\CustomExtension::class,
+        \App\Scramble\SecurityExtension::class,
     ],
+
+
 
     /*
      * Define the middleware that will be applied to the documentation routes.
