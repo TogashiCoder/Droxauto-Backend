@@ -29,7 +29,13 @@ class CreateRoleRequest extends FormRequest
                 'max:255',
                 Rule::unique('roles', 'name')->where(function ($query) {
                     return $query->where('guard_name', $this->guard_name ?? 'api');
-                })
+                }),
+                function ($attribute, $value, $fail) {
+                    // Prevent creating roles with system role names
+                    if (\App\Services\RoleConfigService::isSystemRole($value)) {
+                        $fail("Cannot create a role with the name '{$value}' as it conflicts with a system role name.");
+                    }
+                }
             ],
             'guard_name' => 'string|max:255|in:api,web',
             'description' => 'nullable|string|max:1000',

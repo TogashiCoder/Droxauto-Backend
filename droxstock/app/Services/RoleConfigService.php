@@ -74,7 +74,7 @@ class RoleConfigService
         return self::getRole($roleKey);
     }
 
-    /**
+        /**
      * Check if a role is protected (cannot be deleted)
      */
     public static function isProtectedRole(string $roleName): bool
@@ -84,6 +84,78 @@ class RoleConfigService
         
         // Check if it's in protected list or is a system role
         return in_array($roleName, $protectedRoles) || in_array($roleName, $systemRoles);
+    }
+
+    /**
+     * Check if a role is a system role (cannot be renamed or deleted)
+     */
+    public static function isSystemRole(string $roleName): bool
+    {
+        $systemRoles = self::getAllRoles();
+        return in_array($roleName, $systemRoles);
+    }
+
+    /**
+     * Check if role name change is allowed
+     */
+    public static function canRenameRole(string $currentRoleName, string $newRoleName): bool
+    {
+        // Cannot rename to empty string
+        if (empty(trim($newRoleName))) {
+            return false;
+        }
+
+        // Cannot rename system roles
+        if (self::isSystemRole($currentRoleName)) {
+            return false;
+        }
+
+        // Cannot rename to an existing system role name
+        if (self::isSystemRole($newRoleName)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get all system role names (values from config)
+     */
+    public static function getSystemRoleNames(): array
+    {
+        return array_values(self::getAllRoles());
+    }
+
+    /**
+     * Validate role operation and return error message if invalid
+     */
+    public static function validateRoleOperation(string $operation, string $roleName, ?string $newRoleName = null): ?string
+    {
+        switch ($operation) {
+            case 'delete':
+                if (self::isProtectedRole($roleName)) {
+                    return "Cannot delete protected system role '{$roleName}'. This role is required for system functionality.";
+                }
+                break;
+
+            case 'rename':
+            case 'update':
+                if (!$newRoleName) {
+                    return "New role name is required for rename operation.";
+                }
+
+                if (!self::canRenameRole($roleName, $newRoleName)) {
+                    if (self::isSystemRole($roleName)) {
+                        return "Cannot rename system role '{$roleName}'. System roles are protected to maintain functionality.";
+                    }
+                    if (self::isSystemRole($newRoleName)) {
+                        return "Cannot rename to '{$newRoleName}' as it conflicts with a system role name.";
+                    }
+                }
+                break;
+        }
+
+        return null; // No error
     }
 
     /**
@@ -101,11 +173,11 @@ class RoleConfigService
     {
         $categories = self::getPermissionsByCategory();
         $permissions = [];
-        
+
         foreach ($categories as $category => $categoryPermissions) {
             $permissions = array_merge($permissions, $categoryPermissions);
         }
-        
+
         return array_unique($permissions);
     }
 

@@ -174,8 +174,21 @@ class RoleController extends Controller
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            // Prevent updating system roles
-            if ($this->roleService->isSystemRole($role)) {
+            // Check if role name change is allowed
+            $newRoleName = $request->validated()['name'] ?? null;
+            if ($newRoleName && $newRoleName !== $role->name) {
+                $validationError = \App\Services\RoleConfigService::validateRoleOperation('rename', $role->name, $newRoleName);
+                if ($validationError) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $validationError,
+                        'error_type' => 'role_protection_violation'
+                    ], Response::HTTP_UNPROCESSABLE_ENTITY);
+                }
+            }
+
+            // Prevent updating other aspects of system roles
+            if (\App\Services\RoleConfigService::isSystemRole($role->name)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Cannot modify system roles'
@@ -233,11 +246,13 @@ class RoleController extends Controller
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            // Prevent deleting system roles
-            if ($this->roleService->isSystemRole($role)) {
+            // Validate role deletion
+            $validationError = \App\Services\RoleConfigService::validateRoleOperation('delete', $role->name);
+            if ($validationError) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Cannot delete system roles'
+                    'message' => $validationError,
+                    'error_type' => 'role_protection_violation'
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 

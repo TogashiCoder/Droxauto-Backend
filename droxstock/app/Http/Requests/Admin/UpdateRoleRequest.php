@@ -31,7 +31,20 @@ class UpdateRoleRequest extends FormRequest
                 'max:255',
                 Rule::unique('roles', 'name')->where(function ($query) {
                     return $query->where('guard_name', $this->guard_name ?? 'api');
-                })->ignore($roleId)
+                })->ignore($roleId),
+                function ($attribute, $value, $fail) {
+                    // Get current role being updated
+                    $roleId = $this->route('role');
+                    $currentRole = \Spatie\Permission\Models\Role::find($roleId);
+                    
+                    if ($currentRole && $value !== $currentRole->name) {
+                        // Check role protection
+                        $validationError = \App\Services\RoleConfigService::validateRoleOperation('rename', $currentRole->name, $value);
+                        if ($validationError) {
+                            $fail($validationError);
+                        }
+                    }
+                }
             ],
             'description' => 'nullable|string|max:1000',
             'permissions' => 'nullable|array',
