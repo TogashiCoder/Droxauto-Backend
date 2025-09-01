@@ -2,10 +2,15 @@
 
 use App\Http\Controllers\Api\Daparto\DapartoController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+// Health check routes (public)
+Route::get('/health', [HealthController::class, 'check']);
+Route::get('/ping', [HealthController::class, 'ping']);
 
 // Public authentication routes
 Route::prefix('v1/auth')->group(function () {
