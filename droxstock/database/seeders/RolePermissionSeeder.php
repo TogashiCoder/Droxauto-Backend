@@ -86,8 +86,8 @@ class RolePermissionSeeder extends Seeder
         // Create admin user
         $adminUser = User::create([
             'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
+            'email' => 'droxauto@gmail.com',
+            'password' => Hash::make('droxauto_superadmin@2025'),
         ]);
         $adminUser->assignRole('admin');
 
@@ -108,7 +108,7 @@ class RolePermissionSeeder extends Seeder
         $managerUser->assignRole('manager');
 
         $this->command->info('Roles and permissions seeded successfully!');
-        $this->command->info('Admin user: admin@example.com / password');
+        $this->command->info('Admin user: droxauto@gmail.com / droxauto_superadmin@2025');
         $this->command->info('Regular user: user@example.com / password');
         $this->command->info('Manager user: manager@example.com / password');
         $this->command->info('Note: Self-registered users get NO roles/permissions');
