@@ -85,32 +85,32 @@ class RolePermissionSeeder extends Seeder
 
         // Create admin user
         $adminUser = User::create([
-            'name' => 'Admin User',
-            'email' => 'droxauto@gmail.com',
+            'name' => 'Hassan Admin',
+            'email' => 'silverproduction2023@gmail.com',
             'password' => Hash::make('droxauto_superadmin@2025'),
         ]);
         $adminUser->assignRole('admin');
 
         // Create regular user
         $regularUser = User::create([
-            'name' => 'Regular User',
-            'email' => 'user@example.com',
-            'password' => Hash::make('password'),
+            'name' => 'Daparto',
+            'email' => 'daparto@platforme.com',
+            'password' => Hash::make('daparto_Q8r!Z5vH2n'),
         ]);
         $regularUser->assignRole('user');
 
         // Create manager user
         $managerUser = User::create([
-            'name' => 'Manager User',
-            'email' => 'manager@example.com',
-            'password' => Hash::make('password'),
+            'name' => 'Manager Taoufik',
+            'email' => 'taoufik.b.pro@gmail.com',
+            'password' => Hash::make('Taoufik123@///@2020'),
         ]);
         $managerUser->assignRole('manager');
 
         $this->command->info('Roles and permissions seeded successfully!');
         $this->command->info('Admin user: droxauto@gmail.com / droxauto_superadmin@2025');
-        $this->command->info('Regular user: user@example.com / password');
-        $this->command->info('Manager user: manager@example.com / password');
+        $this->command->info('Regular user: daparto@platforme.com / daparto_Q8r!Z5vH2n');
+        $this->command->info('Manager user: taoufik.b.pro@gmail.com / Taoufik123@///@2020');
         $this->command->info('Note: Self-registered users get NO roles/permissions');
         $this->command->info('Admin-created users get "basic_user" role by default');
     }
