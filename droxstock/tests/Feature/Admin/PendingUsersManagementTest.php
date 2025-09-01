@@ -114,7 +114,7 @@ describe('Pending Users Management System', function () {
 
             // Debug: Let's also check what users exist in the database
             $allUsers = User::all(['id', 'name', 'email', 'registration_status', 'is_active']);
-            dump('All users in database:', $allUsers->toArray());
+            // Debug information removed for production
 
             // Try both users to see if the issue is consistent
             $response1 = $this->actingAs($this->adminUser)
@@ -123,17 +123,13 @@ describe('Pending Users Management System', function () {
             $response2 = $this->actingAs($this->adminUser)
                 ->getJson("/api/v1/admin/pending-users/2"); // Try the user from beforeEach
 
-            dump('Response 1 (fresh user):', $response1->status(), $response1->content());
-            dump('Response 2 (beforeEach user):', $response2->status(), $response2->content());
+                    // Debug information removed for production
 
             $response = $response1; // Use the first response for assertions
 
             // Debug: If we get an error, let's see what it says
             if ($response->status() !== 200) {
-                dump('Response status:', $response->status());
-                dump('Response body:', $response->content());
-                dump('User ID being requested:', $freshPendingUser->id);
-                dump('User status in database:', User::find($freshPendingUser->id)->registration_status);
+                        // Debug information removed for production
             }
 
             $response->assertStatus(200)

@@ -288,7 +288,7 @@ class PermissionService
      */
     public function validatePermissionHierarchy(array $permissions): bool
     {
-        // TODO: Implement permission hierarchy validation
+        // Permission hierarchy validation - Future enhancement
         // This could include checking for conflicting permissions
         // or ensuring proper permission dependencies
         return true;
@@ -299,7 +299,7 @@ class PermissionService
      */
     public function hasCircularDependency(array $permissions): bool
     {
-        // TODO: Implement circular dependency detection
+        // Circular dependency detection - Future enhancement
         // This could be useful for complex permission systems
         return false;
     }

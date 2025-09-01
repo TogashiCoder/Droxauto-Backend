@@ -324,7 +324,7 @@ $this->assertSoftDeleted('dapartos', ['id' => $id]);
 
 ```php
 // Debug response content
-$response->dump();
+// Debug statement removed for production
 $response->dumpHeaders();
 
 // Inspect JSON structure
