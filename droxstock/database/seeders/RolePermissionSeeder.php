@@ -88,6 +88,9 @@ class RolePermissionSeeder extends Seeder
             'name' => 'Hassan Admin',
             'email' => 'silverproduction2023@gmail.com',
             'password' => Hash::make('droxauto_superadmin@2025'),
+            'registration_status' => 'approved',
+            'registration_date' => now(),
+            'approved_at' => now(),
         ]);
         $adminUser->assignRole('admin');
 
@@ -96,6 +99,9 @@ class RolePermissionSeeder extends Seeder
             'name' => 'Daparto',
             'email' => 'daparto@platforme.com',
             'password' => Hash::make('daparto_Q8r!Z5vH2n'),
+            'registration_status' => 'approved',
+            'registration_date' => now(),
+            'approved_at' => now(),
         ]);
         $regularUser->assignRole('user');
 
@@ -104,6 +110,9 @@ class RolePermissionSeeder extends Seeder
             'name' => 'Manager Taoufik',
             'email' => 'taoufik.b.pro@gmail.com',
             'password' => Hash::make('Taoufik123@///@2020'),
+            'registration_status' => 'approved',
+            'registration_date' => now(),
+            'approved_at' => now(),
         ]);
         $managerUser->assignRole('manager');
 
