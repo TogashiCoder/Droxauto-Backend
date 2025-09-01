@@ -18,9 +18,6 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
         ]);
 
-        // Create additional test data if needed
-        if (app()->environment('local', 'testing')) {
-            User::factory(5)->create();
-        }
+        // Only use the seeded admin users from RolePermissionSeeder
     }
 }
