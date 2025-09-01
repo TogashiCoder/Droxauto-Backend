@@ -81,7 +81,7 @@ class RoleConfigService
     {
         $protectedRoles = Config::get('roles.protected_roles', []);
         $systemRoles = self::getAllRoles();
-        
+
         // Check if it's in protected list or is a system role
         return in_array($roleName, $protectedRoles) || in_array($roleName, $systemRoles);
     }

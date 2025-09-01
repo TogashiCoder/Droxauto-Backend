@@ -36,7 +36,7 @@ class UpdateRoleRequest extends FormRequest
                     // Get current role being updated
                     $roleId = $this->route('role');
                     $currentRole = \Spatie\Permission\Models\Role::find($roleId);
-                    
+
                     if ($currentRole && $value !== $currentRole->name) {
                         // Check role protection
                         $validationError = \App\Services\RoleConfigService::validateRoleOperation('rename', $currentRole->name, $value);

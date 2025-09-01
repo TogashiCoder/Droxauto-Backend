@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 /**
  * Unit Tests for RoleConfigService
- * 
+ *
  * Tests the core logic of role configuration and protection
  * without database dependencies.
  */
@@ -17,7 +17,7 @@ class RoleConfigServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Set up test configuration
         Config::set('roles.system_roles', [
             'admin' => 'admin',

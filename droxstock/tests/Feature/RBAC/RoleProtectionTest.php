@@ -10,10 +10,10 @@ use Tests\TestCase;
 
 /**
  * Professional Test Suite for Role Protection System
- * 
+ *
  * Tests comprehensive role protection functionality including:
  * - System role deletion protection
- * - System role rename protection  
+ * - System role rename protection
  * - Custom role management freedom
  * - Edge cases and security scenarios
  */
@@ -27,10 +27,10 @@ class RoleProtectionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create authenticated admin user for all tests
         $this->adminUser = $this->createAdminUser();
-        
+
         // Create a custom role for testing
         $this->customRole = Role::create([
             'name' => 'custom_test_role',
@@ -181,15 +181,15 @@ class RoleProtectionTest extends TestCase
         $responseData = $response->json();
         $nameErrors = $responseData['errors']['name'] ?? [];
         $protectionErrorFound = false;
-        
+
         foreach ($nameErrors as $error) {
             if (str_contains($error, "Cannot rename to '{$adminRoleName}' as it conflicts with a system role name.")) {
                 $protectionErrorFound = true;
                 break;
             }
         }
-        
-        $this->assertTrue($protectionErrorFound, 
+
+        $this->assertTrue($protectionErrorFound,
             "Expected role protection error message not found in: " . json_encode($nameErrors));
 
         // Verify custom role name unchanged
@@ -308,15 +308,15 @@ class RoleProtectionTest extends TestCase
         $responseData = $response->json();
         $nameErrors = $responseData['errors']['name'] ?? [];
         $protectionErrorFound = false;
-        
+
         foreach ($nameErrors as $error) {
             if (str_contains($error, "Cannot create a role with the name '{$adminRoleName}' as it conflicts with a system role name.")) {
                 $protectionErrorFound = true;
                 break;
             }
         }
-        
-        $this->assertTrue($protectionErrorFound, 
+
+        $this->assertTrue($protectionErrorFound,
             "Expected role protection error message not found in: " . json_encode($nameErrors));
     }
 
@@ -438,10 +438,10 @@ class RoleProtectionTest extends TestCase
     {
         // Test with different role configurations
         config(['roles.system_roles.admin' => 'super_administrator']);
-        
+
         $newAdminRoleName = RoleConfigService::getAdminRole();
         $this->assertEquals('super_administrator', $newAdminRoleName);
-        
+
         // Create role with new name
         $newAdminRole = Role::create([
             'name' => $newAdminRoleName,
