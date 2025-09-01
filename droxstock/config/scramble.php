@@ -110,6 +110,8 @@ return [
 
 
 
+
+
     /*
      * Define the middleware that will be applied to the documentation routes.
      */
