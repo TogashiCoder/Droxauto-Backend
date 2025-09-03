@@ -14,7 +14,8 @@ RUN apk add --no-cache \
     postgresql-dev \
     oniguruma-dev \
     nginx \
-    supervisor
+    supervisor \
+    ca-certificates
 
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -29,6 +30,11 @@ RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
 # Configure PHP for production
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/app.ini
 COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+
+# Enable required PHP settings for Composer and Laravel
+RUN echo "allow_url_fopen=1" >> /usr/local/etc/php/conf.d/composer.ini \
+    && echo "memory_limit=2G" >> /usr/local/etc/php/conf.d/composer.ini \
+    && echo "disable_functions=" >> /usr/local/etc/php/conf.d/composer.ini
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -52,7 +58,15 @@ RUN composer install \
     --no-interaction \
     --no-progress \
     --no-scripts \
-    --optimize-autoloader
+    --optimize-autoloader \
+    --no-cache \
+    || (composer install \
+    --no-dev \
+    --no-interaction \
+    --no-progress \
+    --no-scripts \
+    --optimize-autoloader \
+    --prefer-source)
 
 # Stage 3: Application
 FROM base AS app
@@ -63,8 +77,12 @@ COPY --from=dependencies --chown=www:www /var/www/html/vendor /var/www/html/vend
 
 # Copy configuration files
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
-COPY docker/nginx/default.conf /etc/nginx/http.d/default.conf
+COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/startup.sh /startup.sh
+RUN chmod +x /startup.sh
+
+
 
 # Create necessary directories and set permissions
 RUN mkdir -p /var/www/html/storage/logs \
@@ -72,17 +90,12 @@ RUN mkdir -p /var/www/html/storage/logs \
     && mkdir -p /var/www/html/storage/framework/sessions \
     && mkdir -p /var/www/html/storage/framework/views \
     && mkdir -p /var/www/html/bootstrap/cache \
-    && chown -R www:www /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R 775 /var/www/html/bootstrap/cache
 
-# Generate optimized autoload files
-RUN composer dump-autoload --optimize --no-dev
-
-# Clear and cache config for production
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
+# Generate optimized autoload files (skip Laravel commands during build)
+RUN composer dump-autoload --optimize --no-dev --no-scripts
 
 # Expose port
 EXPOSE 80
@@ -91,5 +104,5 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost/api/health || exit 1
 
-# Start supervisor
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Start with our custom startup script
+CMD ["/startup.sh"]
