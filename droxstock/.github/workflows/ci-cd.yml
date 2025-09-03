@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 env:
-  PHP_VERSION: '8.2'
-  NODE_VERSION: '18'
+  PHP_VERSION: "8.2"
+  NODE_VERSION: "18"
 
 jobs:
   test:
@@ -119,12 +119,12 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/droxstock:latest
-            ${{ secrets.DOCKER_USERNAME }}/droxstock:${{ github.sha }}
+            togashicoder/droxstock-backend:latest
+            togashicoder/droxstock-backend:${{ github.sha }}
             ${{ secrets.ECR_REGISTRY }}/droxstock:latest
             ${{ secrets.ECR_REGISTRY }}/droxstock:${{ github.sha }}
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/droxstock:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/droxstock:buildcache,mode=max
+          cache-from: type=registry,ref=togashicoder/droxstock-backend:buildcache
+          cache-to: type=registry,ref=togashicoder/droxstock-backend:buildcache,mode=max
 
   deploy:
     name: Deploy to EC2
@@ -172,6 +172,6 @@ jobs:
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
-          text: 'Deployment to EC2 ${{ job.status }}'
+          text: "Deployment to EC2 ${{ job.status }}"
           webhook_url: ${{ secrets.SLACK_WEBHOOK }}
           fields: repo,message,commit,author,action,eventName,ref,workflow

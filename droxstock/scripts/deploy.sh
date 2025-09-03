@@ -41,9 +41,8 @@ cd $APP_DIR
 # Create backup directory if it doesn't exist
 mkdir -p $BACKUP_DIR
 
-# Backup database
-print_status "Backing up database..."
-docker-compose exec -T db pg_dump -U droxstock droxstock | gzip > "$BACKUP_DIR/db_backup_$TIMESTAMP.sql.gz"
+# Note: Database backup skipped - using external RDS PostgreSQL
+print_status "Using external RDS database - no local backup needed..."
 
 # Pull latest code
 print_status "Pulling latest code from repository..."
@@ -95,9 +94,8 @@ docker-compose exec -T app chmod -R 775 /var/www/html/bootstrap/cache
 print_status "Cleaning up Docker resources..."
 docker system prune -af --volumes
 
-# Clean up old backups (keep last 7 days)
-print_status "Cleaning up old backups..."
-find $BACKUP_DIR -name "db_backup_*.sql.gz" -mtime +7 -delete
+# Note: No local database backups to clean up (using external RDS)
+print_status "External RDS database - no local backups to clean..."
 
 # Health check
 print_status "Running health check..."
@@ -138,6 +136,6 @@ echo "📊 Deployment Summary:"
 echo "- Timestamp: $TIMESTAMP"
 echo "- Git Commit: $(git rev-parse --short HEAD)"
 echo "- Branch: $(git branch --show-current)"
-echo "- Database Backup: $BACKUP_DIR/db_backup_$TIMESTAMP.sql.gz"
+echo "- Database: External RDS PostgreSQL"
 echo ""
 echo "🎉 DroxStock API is now live!"

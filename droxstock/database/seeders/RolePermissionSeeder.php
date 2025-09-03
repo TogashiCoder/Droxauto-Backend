@@ -98,7 +98,7 @@ class RolePermissionSeeder extends Seeder
             ['email' => 'silverproduction2023@gmail.com'],
             [
                 'name' => 'Hassan Admin',
-                'email' => 'silverproduction2023@gmail.com',
+                'email' => 'droxauto@gmail.com',
                 'password' => Hash::make('droxauto_superadmin@2025'),
                 'registration_status' => 'approved',
                 'registration_date' => now(),
